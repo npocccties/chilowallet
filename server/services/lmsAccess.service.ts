@@ -129,7 +129,8 @@ export const myBadgesList = async (username: string, password: string, selectLms
 
 const getMyCourses = async (token: string, selectLms: LmsList): Promise<IfCourseInfo[]> => {
   const { lmsUrl } = selectLms;
-  const myCoursesURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_enrol_get_users_courses&moodlewsrestformat=json&wstoken=${token}`;
+  const userId = 15;
+  const myCoursesURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_enrol_get_users_courses&moodlewsrestformat=json&wstoken=${token}&userid=${userId}`;
 
   const options: AxiosRequestConfig = {
     method: "GET",
