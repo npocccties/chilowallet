@@ -1,10 +1,10 @@
-import { myBadgesList } from "./lmsAccess.service";
+import { myBadgesList, myCoursesList } from "./lmsAccess.service";
 
 import { errors } from "@/constants/error";
-import { loggerError } from "@/lib/logger";
+import { loggerDebug, loggerError } from "@/lib/logger";
 import prisma from "@/lib/prisma";
 import { BadgeListResponse } from "@/types/api/badge";
-import { IfBadgeInfo } from "@/types/BadgeInfo";
+import { IfBadgeInfo, IfCourseInfo } from "@/types/BadgeInfo";
 
 type Arg = {
   walletId: number;
@@ -44,6 +44,11 @@ export const getBadgeListFromMoodle = async ({
         return;
       }
       badge.vcConverted = false;
+    });
+
+    const courseList: IfCourseInfo[] = await myCoursesList(username, password, selectLms);
+    courseList.map((course) => {
+      loggerDebug(`course: ${course}`)
     });
 
     return { badgeList };

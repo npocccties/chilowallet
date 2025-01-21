@@ -73,3 +73,13 @@ export type Issuer = {
   id: string;
   type: string;
 };
+
+export interface IfCourseInfo {
+  id: number;           // コースID
+  fullname: string;     // コース名
+  shortname: string;    // 省略名
+  startdate: string;    // 開始日
+  enddate?: string;     // 終了日
+  category?: string;    // カテゴリID
+  progress?: string;    // 進捗
+}
