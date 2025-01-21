@@ -129,8 +129,7 @@ export const myBadgesList = async (username: string, password: string, selectLms
 
 const getMyCourses = async (token: string, selectLms: LmsList): Promise<IfCourseInfo[]> => {
   const { lmsUrl } = selectLms;
-  const userId = 15;
-  const myCoursesURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_enrol_get_users_courses&moodlewsrestformat=json&wstoken=${token}&userid=${userId}`;
+  const myCoursesURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_enrol_get_users_courses&moodlewsrestformat=json&wstoken=${token}`;
 
   const options: AxiosRequestConfig = {
     method: "GET",
@@ -143,7 +142,7 @@ const getMyCourses = async (token: string, selectLms: LmsList): Promise<IfCourse
     }, moodleRetryConfig);
     loggerDebug("response getMyCourses", data);
 
-    return data.courses;
+    return data;
   } catch (err) {
     loggerError(`${logStatus.error}`, err.message);
     throw err;
