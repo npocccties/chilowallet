@@ -236,7 +236,7 @@ https://nextjs.org/docs/pages/building-your-application/configuring/environment-
 |ms_entra_id_api_request_retry_time|VC発行関連（Microsoft Entra Verified ID）アクセス失敗時のリトライ間隔（ms）設定|-|必須|
 |badge_cabinet_api_request_retry_count|CabinetのAPIアクセス失敗時のリトライ回数設定|-|必須|
 |badge_cabinet_api_request_retry_count|CabinetのAPIアクセス失敗時のリトライ間隔（ms）設定|-|必須|
-|vc_credential_issuer|Entra Verified Idの発行者|指定がなければ|任意|
+|vc_credential_issuer|Entra Verified Idの発行者|指定がなければvc_manifest_urlから該当情報を取得する|任意|
 
 
 ### 5-2-1. vc* に設定する環境変数について
