@@ -4,7 +4,7 @@ import { msEntraRetryConfig } from "@/configs/retry";
 import { loggerDebug } from "@/lib/logger";
 import { retryRequest } from "@/lib/retryRequest";
 import { KeyPair, Signer } from "@/lib/signer";
-import { AcquiredIdToken, Manifest, VCRequest } from "@/types";
+import { AcquiredIdToken, VCRequest } from "@/types";
 
 interface IIssueResponse {
   data: {
@@ -14,7 +14,8 @@ interface IIssueResponse {
 
 export const issue = async (
   vcRequest: VCRequest,
-  manifest: Manifest,
+  manifestURL: string,
+  credentialIssuer: string,
   acquiredIdToken: AcquiredIdToken,
   options?: { [key: string]: any },
 ): Promise<string> => {
@@ -25,12 +26,13 @@ export const issue = async (
   await signer.init(keyObj);
 
   loggerDebug("wallet did", signer.did);
+  loggerDebug(`manifestURL: ${manifestURL}`);
 
   let attestations: any = { ...acquiredIdToken };
 
   const issueRequestIdToken = await signer.siop({
-    aud: manifest.input.credentialIssuer,
-    contract: manifest.display.contract,
+    aud: credentialIssuer,
+    contract: manifestURL,
     attestations,
     pin: options?.pin,
   });
@@ -38,7 +40,7 @@ export const issue = async (
   loggerDebug("issue request id token", issueRequestIdToken);
 
   const issueResponse = await retryRequest(() => {
-    return axios.post<string, IIssueResponse>(manifest.input.credentialIssuer, issueRequestIdToken, {
+    return axios.post<string, IIssueResponse>(credentialIssuer, issueRequestIdToken, {
       headers: { "Content-Type": "text/plain" },
     });
   }, msEntraRetryConfig);
