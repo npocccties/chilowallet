@@ -1,3 +1,4 @@
+import { Manifest } from "next/dist/lib/metadata/types/manifest-types";
 import { issue } from "./issue.service";
 import { issueRequest } from "./issueRequest.service";
 import { getManifest } from "./manifest.service";
@@ -7,7 +8,7 @@ import { verifyVcRequest } from "./verifyVcReqest.service";
 import { getWalletId } from "./wallet.service";
 
 import { logStartForApi, logEndForApi } from "@/constants/log";
-import { loggerInfo } from "@/lib/logger";
+import { loggerDebug, loggerInfo } from "@/lib/logger";
 import { getRequestFromVCRequest, calcPinhash } from "@/lib/utils";
 import { BadgeMetaData } from "@/types/badgeInfo/metaData";
 
@@ -28,9 +29,10 @@ export const convertVcFromBadge = async ({ apiPath, badgeMetaData, email, eppn, 
 
   const openBadgeImage = await setOpenBadgeMetadataToImage(base64ImageWithoutPrefix, badgeMetaData);
 
-  const manifestURL = process.env.vc_manifest_url;
+  var manifestURL = process.env.vc_manifest_url;
   const badgeClass = await getBadgeClassById(badgeMetaData.badge.id);
   const verificationURL = badgeMetaData.verify.url;
+  var credentialIssuer = process.env.vc_credential_issuer;
 
   loggerInfo(logStartForApi(apiPath, "issue request"));
   const { pin, url } = await issueRequest(
@@ -50,7 +52,15 @@ export const convertVcFromBadge = async ({ apiPath, badgeMetaData, email, eppn, 
 
   const { vcRequest } = getRequestFromVCRequest(vcRequestInJwt);
 
-  const manifest = await getManifest(manifestURL);
+  if (!credentialIssuer) {
+    loggerDebug("vc_credential_issuer is not defined.");
+    const manifest = await getManifest(manifestURL);
+    credentialIssuer = manifest.input.credentialIssuer;
+    manifestURL  = manifest.display.contract || manifestURL; // manifest.display.contract = manifestURL と思うが念のため
+    loggerDebug(`credentialIssuer: ${credentialIssuer} manifest.display.contract: ${manifest.display.contract}`);
+  } else {
+    loggerDebug(`vc_credential_issuer: ${credentialIssuer}`);
+  }
   const acquiredAttestation = {};
 
   if (vcRequest.id_token_hint) {
@@ -61,7 +71,7 @@ export const convertVcFromBadge = async ({ apiPath, badgeMetaData, email, eppn, 
   loggerInfo(logStartForApi(apiPath, "issue"));
   const pinhash = await calcPinhash(pin.toString(), vcRequest.pin.salt);
 
-  const vcJwt = await issue(vcRequest, manifest, acquiredAttestation, { pin: pinhash });
+  const vcJwt = await issue(vcRequest, manifestURL, credentialIssuer, acquiredAttestation, { pin: pinhash });
   loggerInfo(logEndForApi(apiPath, "issue"));
 
   const walletId = await getWalletId(eppn);
