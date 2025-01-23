@@ -29,7 +29,7 @@ export const convertVcFromBadge = async ({ apiPath, badgeMetaData, email, eppn, 
 
   const openBadgeImage = await setOpenBadgeMetadataToImage(base64ImageWithoutPrefix, badgeMetaData);
 
-  const manifestURL = process.env.vc_manifest_url;
+  var manifestURL = process.env.vc_manifest_url;
   const badgeClass = await getBadgeClassById(badgeMetaData.badge.id);
   const verificationURL = badgeMetaData.verify.url;
   var credentialIssuer = process.env.vc_credential_issuer;
@@ -56,7 +56,8 @@ export const convertVcFromBadge = async ({ apiPath, badgeMetaData, email, eppn, 
     loggerDebug("vc_credential_issuer is not defined.");
     const manifest = await getManifest(manifestURL);
     credentialIssuer = manifest.input.credentialIssuer;
-    loggerDebug(`credentialIssuer: ${credentialIssuer}`);
+    manifestURL  = manifest.display.contract || manifestURL; // manifest.display.contract = manifestURL と思うが念のため
+    loggerDebug(`credentialIssuer: ${credentialIssuer} manifest.display.contract: ${manifest.display.contract}`);
   } else {
     loggerDebug(`vc_credential_issuer: ${credentialIssuer}`);
   }
