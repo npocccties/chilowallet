@@ -7,7 +7,7 @@ import { logStatus } from "@/constants/log";
 import { loggerDebug, loggerError } from "@/lib/logger";
 import { retryRequest } from "@/lib/retryRequest";
 import { encodeReqestGetUrlParams } from "@/lib/url";
-import { IfBadgeInfo } from "@/types/BadgeInfo";
+import { IfBadgeInfo, IfCourseInfo } from "@/types/BadgeInfo";
 import { BadgeMetaData } from "@/types/badgeInfo/metaData";
 
 const getMyToken = async (username: string, password: string, selectLms: LmsList): Promise<string> => {
@@ -121,6 +121,46 @@ export const myBadgesList = async (username: string, password: string, selectLms
     const badgesInfoJson: IfBadgeInfo[] = await getMyBadges(token, selectLms);
 
     return badgesInfoJson;
+  } catch (err) {
+    loggerError(`${logStatus.error} server/service/lmsAccess.service myBadgesList`);
+    throw err;
+  }
+};
+
+const getMyCourses = async (token: string, selectLms: LmsList): Promise<IfCourseInfo[]> => {
+  const { lmsUrl } = selectLms;
+  const myCoursesURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_enrol_get_users_courses&moodlewsrestformat=json&wstoken=${token}`;
+
+  const options: AxiosRequestConfig = {
+    method: "GET",
+    url: myCoursesURL,
+    //httpsAgent: new https.Agent({ rejectUnauthorized: false }), // SSL Error: Unable to verify the first certificateの回避 正式な証明書なら出ないはず
+  };
+  try {
+    const { data } = await retryRequest(() => {
+      return axios(options);
+    }, moodleRetryConfig);
+    loggerDebug("response getMyCourses", data);
+
+    return data;
+  } catch (err) {
+    loggerError(`${logStatus.error}`, err.message);
+    throw err;
+  }
+};
+
+export const myCoursesList = async (username: string, password: string, selectLms: LmsList): Promise<IfCourseInfo[]> => {
+  try {
+    const { ssoEnabled } = selectLms;
+    let token = "";
+    if (ssoEnabled) {
+      token = await getMyTokenAdmin(username, selectLms);
+    } else {
+      token = await getMyToken(username, password, selectLms);
+    }
+    const coursesInfoJson: IfCourseInfo[] = await getMyCourses(token, selectLms);
+
+    return coursesInfoJson;
   } catch (err) {
     loggerError(`${logStatus.error} server/service/lmsAccess.service myBadgesList`);
     throw err;
