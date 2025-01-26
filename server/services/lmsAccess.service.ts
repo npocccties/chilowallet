@@ -7,7 +7,7 @@ import { logStatus } from "@/constants/log";
 import { loggerDebug, loggerError } from "@/lib/logger";
 import { retryRequest } from "@/lib/retryRequest";
 import { encodeReqestGetUrlParams } from "@/lib/url";
-import { IfBadgeInfo, IfCourseInfo } from "@/types/BadgeInfo";
+import { IfBadgeInfo, IfCourseInfo, IfUserInfo } from "@/types/BadgeInfo";
 import { BadgeMetaData } from "@/types/badgeInfo/metaData";
 
 const getMyToken = async (username: string, password: string, selectLms: LmsList): Promise<string> => {
@@ -127,20 +127,40 @@ export const myBadgesList = async (username: string, password: string, selectLms
   }
 };
 
-const getMyCourses = async (token: string, selectLms: LmsList): Promise<IfCourseInfo[]> => {
+const getMyCourses = async (token: string, selectLms: LmsList, userid: number): Promise<IfCourseInfo[]> => {
   const { lmsUrl } = selectLms;
-  const myCoursesURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_enrol_get_users_courses&moodlewsrestformat=json&wstoken=${token}`;
+  const myCoursesURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_enrol_get_users_courses&moodlewsrestformat=json&wstoken=${token}&userid=${userid}`;
 
   const options: AxiosRequestConfig = {
     method: "GET",
     url: myCoursesURL,
-    //httpsAgent: new https.Agent({ rejectUnauthorized: false }), // SSL Error: Unable to verify the first certificateの回避 正式な証明書なら出ないはず
   };
   try {
     const { data } = await retryRequest(() => {
       return axios(options);
     }, moodleRetryConfig);
     loggerDebug("response getMyCourses", data);
+
+    return data;
+  } catch (err) {
+    loggerError(`${logStatus.error}`, err.message);
+    throw err;
+  }
+};
+
+const getUserByUsername = async (token: string, selectLms: LmsList, username: string): Promise<IfUserInfo[]> => {
+  const { lmsUrl } = selectLms;
+  const userURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&wstoken=${token}&username=${username}`;
+
+  const options: AxiosRequestConfig = {
+    method: "GET",
+    url: userURL,
+  };
+  try {
+    const { data } = await retryRequest(() => {
+      return axios(options);
+    }, moodleRetryConfig);
+    loggerDebug("response getUser", data);
 
     return data;
   } catch (err) {
@@ -158,9 +178,13 @@ export const myCoursesList = async (username: string, password: string, selectLm
     } else {
       token = await getMyToken(username, password, selectLms);
     }
-    const coursesInfoJson: IfCourseInfo[] = await getMyCourses(token, selectLms);
+    const userInfos: IfUserInfo[] = await getUserByUsername(token, selectLms, username);
+    if (userInfos.length == 0) {
+      throw new Error(`Not found user. ${username}`);
+    }
+    const coursesInfos: IfCourseInfo[] = await getMyCourses(token, selectLms, userInfos[0].id);
 
-    return coursesInfoJson;
+    return coursesInfos;
   } catch (err) {
     loggerError(`${logStatus.error} server/service/lmsAccess.service myBadgesList`);
     throw err;

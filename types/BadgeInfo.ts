@@ -90,3 +90,9 @@ export interface IfCourseInfo {
   progress?: number;    // 進捗
   completed: boolean;
 }
+
+export interface IfUserInfo {
+  id: number;           // ユーザID
+  username : string;    // ユーザ名
+  email: string;
+}
