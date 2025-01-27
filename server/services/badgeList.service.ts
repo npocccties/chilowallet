@@ -45,9 +45,7 @@ export const getBadgeListFromMoodle = async ({
       }
       badge.vcConverted = false;
     });
-//test
-    const courseList: IfCourseInfo[] = await myCoursesList(username, password, selectLms);
-//test
+
     return { badgeList };
   } catch (e) {
     if (e.message === errors.moodleErrorCode.invalidLogin) {
