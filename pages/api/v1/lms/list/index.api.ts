@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { errors } from "@/constants/error";
