@@ -150,7 +150,7 @@ const getMyCourses = async (token: string, selectLms: LmsList, userid: number): 
 
 const getUserByUsername = async (token: string, selectLms: LmsList, username: string): Promise<IfUserInfo[]> => {
   const { lmsUrl } = selectLms;
-  const userURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&wstoken=${token}&field=${username}`;
+  const userURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&wstoken=${token}&field=username&values[0]=${username}`;
 
   const options: AxiosRequestConfig = {
     method: "GET",
