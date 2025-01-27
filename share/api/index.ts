@@ -10,6 +10,12 @@ export const api = {
       metadata: "/api/v1/badge/metadata",
       list: "/api/v1/badge/list",
     },
+    course: {
+      list: "/api/v1/course/list",
+    },
+    lms: {
+      list: "/api/v1/lms/list",
+    },
     submission: {
       sendmail: "/api/v1/submission/sendmail",
       vc: "/api/v1/submission/vc",

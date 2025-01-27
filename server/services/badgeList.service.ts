@@ -1,7 +1,7 @@
 import { myBadgesList, myCoursesList } from "./lmsAccess.service";
 
 import { errors } from "@/constants/error";
-import { loggerDebug, loggerError } from "@/lib/logger";
+import { loggerError } from "@/lib/logger";
 import prisma from "@/lib/prisma";
 import { BadgeListResponse } from "@/types/api/badge";
 import { IfBadgeInfo, IfCourseInfo } from "@/types/BadgeInfo";
@@ -45,12 +45,9 @@ export const getBadgeListFromMoodle = async ({
       }
       badge.vcConverted = false;
     });
-
+//test
     const courseList: IfCourseInfo[] = await myCoursesList(username, password, selectLms);
-    courseList.map((course) => {
-      loggerDebug(`course: ${course}`)
-    });
-
+//test
     return { badgeList };
   } catch (e) {
     if (e.message === errors.moodleErrorCode.invalidLogin) {
