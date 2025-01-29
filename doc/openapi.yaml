@@ -29,8 +29,6 @@ tags:
     description: バッジデータの提出
   - name: logout
     description: 不正なログイン情報でログインした際の、ログイン画面遷移処理
-  - name: lms list
-    description: ウォレットで管理しているLMSの一覧を取得
 
 paths:
   /user_badgelist:
@@ -342,22 +340,6 @@ paths:
           description: Bad request
         "500":
           description: Internal Server Error
-  /lms/list:
-    get:
-      tags:
-        - lms list
-      description: ウォレットで管理しているLMSの一覧を取得します
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/lmsList"
-        "401":
-          description: Un Authrized Error
-        "500":
-          description: Internal Server Error
 
 components:
   schemas:
@@ -543,35 +525,3 @@ components:
           type: string
         url:
           type: string
-
-    lmsList:
-      type: object
-      description: 'LMSの情報リスト'
-      properties:
-        lms_list:
-          type: array
-          items:
-            type: object
-            description: 'LMSの情報'
-            properties:
-              lmsId:
-                type: number
-                description: 'LMSのID'
-              lmsName:
-                type: string
-                description: 'LMSの名前'
-              lmsUrl:
-                type: string
-                description: 'LMSのURL'
-              ssoEnabled:
-                type: boolean
-                description: 'LMSへSSO可能か否か'
-            additionalProperties: false
-            required:
-              - lmsId
-              - lmsName
-              - lmsUrl
-              - ssoEnabled
-      additionalProperties: false
-      required:
-        - lms_list
