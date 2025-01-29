@@ -402,7 +402,7 @@ components:
             properties:
               badge_status:
                 type: integer
-                description: 'バッジ取得状況 (1:受講有, 2:バッジ取得済, 3: ウォレット取込済, 4: バッジ未取得)'
+                description: 'バッジ取得状況 (1:受講有, 2:バッジ取得済, 3: ウォレット取込済)'
               course:
                 type: object
                 description: '受講コース情報'
