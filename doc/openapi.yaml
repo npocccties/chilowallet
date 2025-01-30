@@ -393,6 +393,39 @@ components:
     user_badgestatuslist:
       type: object
       properties:
+        course_list:
+          type: array
+          description: 'コース一覧リスト'
+          items:
+            type: object
+            description: 'コース情報'
+            properties:
+              id:
+                type: integer
+                description: 'コースID'
+              shortname:
+                type: string
+                description: 'コース名（ショート）'
+              fullname:
+                type: string
+                description: 'コース名（正式）'
+              displayname:
+                type: string
+                description: 'コース名（表示名）'
+              progress:
+                type: number
+                description: 'コース進捗状況 (0.0～100.0)'
+              complete:
+                type: integer
+                description: 'コース完了フラグ'
+              started_date:
+                type: string
+                format: date-time
+                description: 'コース開始日'
+              ended_date:
+                type: string
+                format: date-time
+                description: 'コース修了日'
         lms_badge_list:
           type: array
           description: 'LMS別のバッジ情報リスト'
@@ -403,33 +436,9 @@ components:
               badge_status:
                 type: integer
                 description: 'バッジ取得状況 (1:受講有, 2:バッジ取得済, 3: ウォレット取込済)'
-              course:
-                type: object
-                description: '受講コース情報'
-                properties:
-                  shortname:
-                    type: string
-                    description: 'コース名（ショート）'
-                  fullname:
-                    type: string
-                    description: 'コース名（正式）'
-                  displayname:
-                    type: string
-                    description: 'コース名（表示名）'
-                  progress:
-                    type: number
-                    description: 'コース進捗状況 (0.0～100.0)'
-                  complete:
-                    type: integer
-                    description: 'コース完了フラグ'
-                  started_date:
-                    type: string
-                    format: date-time
-                    description: 'コース開始日'
-                  ended_date:
-                    type: string
-                    format: date-time
-                    description: 'コース修了日'
+              course_id:
+                type: integer
+                description: '受講したコースID'
               wisdom_badge:
                 type: object
                 description: '能力バッジ情報 ※ポータルからの流用'
