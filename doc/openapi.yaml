@@ -420,6 +420,11 @@ components:
               lms_name:
                 type: string
                 description: 'LMSの名前'
+            required:
+              - badge_status
+              - badges_id
+              - lms_id
+              - lms_name
         error_code:
           type: string
           description: |
@@ -428,8 +433,13 @@ components:
             E10001: LMSからコース一覧が取得できない
             E10002: LMSからバッジ一覧が取得できない
             E20000: ウォレットDBにLMS一覧が存在しない
-            E29999: ウォレットサーバにて意図せぬ例外が発生
+            E29999: ウォレットサーバにて予期せぬ例外が発生
             E30000: ポータルからバッジ一覧が取得できない
+            空: 正常
+      required:
+        - lms_badge_count
+        - lms_badge_list
+        - error_code
 
     vcList:
       type: object
