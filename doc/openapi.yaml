@@ -393,6 +393,15 @@ components:
     user_badgestatuslist:
       type: object
       properties:
+        attendance_count:
+          type: integer
+          description: '受講数'
+        completed_badges_count:
+          type: integer
+          description: '発行バッジ数'
+        imported_badges_count:
+          type: integer
+          description: '受領バッジ数'
         lms_badge_list:
           type: array
           description: 'LMS別のバッジ取得状況リスト'
@@ -402,10 +411,10 @@ components:
             properties:
               badge_status:
                 type: integer
-                description: 'バッジ取得状況 (1:受講, 2:発行, 3:受領) |
-                              受講： LMSコース一覧取得APIのリストにあり、LMSからバッジ取得できない |
-                              発行： LMSからバッジ取得できるがウォレットのDBにない |
-                              受領： ウォレットのDBにある'
+                description: 'バッジ取得状況 |
+                              1:受講 (LMSコース一覧取得APIのリストにあり、LMSからバッジ取得できない) |
+                              2:発行 (LMSからバッジ取得できるがウォレットのDBにない) |
+                              3:受領 (ウォレットのDBにある)'
               badges_id:
                 type: integer
                 format: int64
@@ -416,6 +425,16 @@ components:
               lms_name:
                 type: string
                 description: 'LMSの名前'
+              error_code:
+                type: string
+                description: 'エラーコード |
+                              E10000: LMSからユーザ情報が取得できない
+                              E10001: LMSからコース一覧が取得できない
+                              E10002: LMSからバッジ一覧が取得できない
+                              E20000: ウォレットDBにLMS一覧が存在しない
+                              E29999: ウォレットサーバにて意図せぬ例外が発生
+                              E30000: ポータルからバッジ一覧が取得できない
+                              '
 
     vcList:
       type: object
