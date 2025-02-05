@@ -403,7 +403,7 @@ components:
             type: object
             description: 'LMS別のバッジ取得状況'
             properties:
-              attend:
+              enroll:
                 type: boolean
                 description: 受講フラグ (LMSコース一覧取得APIのリストにあり、LMSからバッジ取得できない状態) 
               issue:
@@ -412,6 +412,18 @@ components:
               receive:
                 type: boolean
                 description: 受領フラグ (ウォレットのDBにある状態)
+              enrolled_at:
+                type: string
+                format: date-time
+                description: 受講日
+              issue_at:
+                type: string
+                format: date-time
+                description: 発行日
+              imported_at:
+                type: string
+                format: date-time
+                description: 受領日
               badges_id:
                 type: integer
                 format: int64
@@ -423,7 +435,7 @@ components:
                 type: string
                 description: 'LMSの名前'
             required:
-              - attend
+              - enroll
               - issue
               - receive
               - badges_id
