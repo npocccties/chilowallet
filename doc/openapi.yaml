@@ -403,20 +403,20 @@ components:
             type: object
             description: 'LMS別のバッジ取得状況'
             properties:
-              enroll:
+              enrolled:
                 type: boolean
                 description: 受講フラグ (LMSコース一覧取得APIのリストにあり、LMSからバッジ取得できない状態) 
-              issue:
+              issued:
                 type: boolean
                 description: 発行フラグ (LMSからバッジ取得できるがウォレットのDBにない状態) 
-              receive:
+              imported:
                 type: boolean
                 description: 受領フラグ (ウォレットのDBにある状態)
               enrolled_at:
                 type: string
                 format: date-time
                 description: 受講日
-              issue_at:
+              issued_at:
                 type: string
                 format: date-time
                 description: 発行日
