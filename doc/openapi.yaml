@@ -424,7 +424,7 @@ components:
                 type: string
                 format: date-time
                 description: 受領日
-              badges_id:
+              badge_id:
                 type: integer
                 format: int64
                 description: '能力バッジID（ポータルDB）'
@@ -438,7 +438,7 @@ components:
               - enrolled
               - issued
               - imported
-              - badges_id
+              - badge_id
               - lms_id
               - lms_name
         error_code:
