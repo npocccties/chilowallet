@@ -435,9 +435,9 @@ components:
                 type: string
                 description: 'LMSの名前'
             required:
-              - enroll
-              - issue
-              - receive
+              - enrolled
+              - issued
+              - imported
               - badges_id
               - lms_id
               - lms_name
