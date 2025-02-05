@@ -426,6 +426,7 @@ components:
               - attend
               - issue
               - receive
+              - badges_id
               - lms_id
               - lms_name
         error_code:
