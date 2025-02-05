@@ -403,13 +403,15 @@ components:
             type: object
             description: 'LMS別のバッジ取得状況'
             properties:
-              badge_status:
-                type: integer
-                description: |
-                  バッジ取得状況
-                  1:受講 (LMSコース一覧取得APIのリストにあり、LMSからバッジ取得できない) 
-                  2:発行 (LMSからバッジ取得できるがウォレットのDBにない) 
-                  3:受領 (ウォレットのDBにある)
+              attend:
+                type: boolean
+                description: 受講フラグ (LMSコース一覧取得APIのリストにあり、LMSからバッジ取得できない状態) 
+              issue:
+                type: boolean
+                description: 発行フラグ (LMSからバッジ取得できるがウォレットのDBにない状態) 
+              receive:
+                type: boolean
+                description: 受領フラグ (ウォレットのDBにある状態)
               badges_id:
                 type: integer
                 format: int64
@@ -421,8 +423,9 @@ components:
                 type: string
                 description: 'LMSの名前'
             required:
-              - badge_status
-              - badges_id
+              - attend
+              - issue
+              - receive
               - lms_id
               - lms_name
         error_code:
@@ -432,6 +435,7 @@ components:
             E10000: LMSからユーザ情報が取得できない
             E10001: LMSからコース一覧が取得できない
             E10002: LMSからバッジ一覧が取得できない
+            E10003: LMSにバッジのメタデータがない
             E20000: ウォレットDBにLMS一覧が存在しない
             E20001: コースと紐づくバッジがポータルにない
             E20002: ポータルのバッジと同じバッジがLMSにない
