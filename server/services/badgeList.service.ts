@@ -1,10 +1,10 @@
-import { myBadgesList, myCoursesList } from "./lmsAccess.service";
+import { myBadgesList } from "./lmsAccess.service";
 
 import { errors } from "@/constants/error";
 import { loggerError } from "@/lib/logger";
 import prisma from "@/lib/prisma";
 import { BadgeListResponse } from "@/types/api/badge";
-import { IfBadgeInfo, IfCourseInfo } from "@/types/BadgeInfo";
+import { IfBadgeInfo } from "@/types/BadgeInfo";
 
 type Arg = {
   walletId: number;
@@ -55,4 +55,29 @@ export const getBadgeListFromMoodle = async ({
     loggerError("ERROR! server/services/badgeList.service", e.message);
     throw e;
   }
+};
+
+export const getVcBadgeCreateDate = async (
+  badgeClassId: string,
+  lmsId: number,
+): Promise<Date> => {
+  const [badgeVcs] = await Promise.all([
+    prisma.badgeVc.findFirst({
+      select: {
+        createdAt: true,
+      },
+      where: {
+        badgeClassId: badgeClassId,
+      },
+    }),
+    prisma.lmsList.findUnique({
+      where: {
+        lmsId: lmsId,
+      },
+    }),
+  ]);
+  if (!badgeVcs) {
+    return null;
+  }
+  return badgeVcs.createdAt;
 };

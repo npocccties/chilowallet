@@ -165,19 +165,13 @@ const getUserByUsername = async (token: string, selectLms: LmsList, username: st
     return data;
   } catch (err) {
     loggerError(`${logStatus.error}`, err.message);
-    throw err;
+    throw new Error("getUserByUsername");
   }
 };
 
-export const myCoursesList = async (username: string, password: string, selectLms: LmsList): Promise<IfCourseInfo[]> => {
+export const myCoursesList = async (username: string, selectLms: LmsList): Promise<IfCourseInfo[]> => {
   try {
-    const { ssoEnabled } = selectLms;
-    let token = "";
-    if (ssoEnabled) {
-      token = await getMyTokenAdmin(username, selectLms);
-    } else {
-      token = await getMyToken(username, password, selectLms);
-    }
+    let token = await getMyTokenAdmin(username, selectLms);
     const userInfos: IfUserInfo[] = await getUserByUsername(token, selectLms, username);
     if (userInfos.length == 0) {
       throw new Error(`Not found user. ${username}`);
@@ -186,8 +180,8 @@ export const myCoursesList = async (username: string, password: string, selectLm
 
     return coursesInfos;
   } catch (err) {
-    loggerError(`${logStatus.error} server/service/lmsAccess.service myBadgesList`);
-    throw err;
+    loggerError(`${logStatus.error} server/service/lmsAccess.service myCoursesList`);
+    throw new Error("myCoursesList");
   }
 };
 

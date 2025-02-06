@@ -88,11 +88,60 @@ export interface IfCourseInfo {
   enddate?: string;     // 終了日
   category?: number;    // カテゴリID
   progress?: number;    // 進捗
-  completed: boolean;
+  completed: number;
 }
 
 export interface IfUserInfo {
   id: number;           // ユーザID
   username : string;    // ユーザ名
   email: string;
+}
+
+export interface IfUserBadgeStatusList {
+  lms_badge_count: number;
+  lms_badge_list: IfUserBadgeStatus[];
+  error_code: string;
+}
+
+export interface IfUserBadgeStatus {
+  enrolled: boolean;
+  issued: boolean;
+  imported: boolean;
+  enrolled_at: string;
+  issued_at: string;
+  imported_at: string;
+  badge_id: number;
+  lms_id: number;
+  lms_name: string;
+}
+
+export type UserBadgeStatus = IfUserBadgeStatus;
+
+export interface IfPortalBadgeDetail2 {
+  badges_id: number;
+}
+
+export interface IfPortalBadgeDetail1 {
+  badges_id: number;
+  type: "wisdom" | "knowledge";
+  name: string;
+  description: string;
+  tags: string;
+  image: string;
+  image_author: string;
+  issuer_name: string;
+  issuer_url: string;
+  issuer_email: string;
+  portal_category_id: number;
+  portal_category_name: string;
+  portal_category_description: string;
+  portal_category_image_url_path: string;
+  digital_badge_class_id: string;
+  alignments_targetname: string;
+  alignments_targeturl: string;
+  detail: Wisdom;
+}
+
+interface Wisdom {
+  knowledge_badges_list: number[];
 }
