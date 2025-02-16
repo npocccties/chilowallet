@@ -139,7 +139,7 @@ const getMyCourses = async (token: string, selectLms: LmsList, userid: number): 
     const { data } = await retryRequest(() => {
       return axios(options);
     }, moodleRetryConfig);
-    loggerDebug("response getMyCourses", data);
+    loggerDebug(`response getMyCourses: ${JSON.stringify(data)}`);
 
     return data;
   } catch (err) {

@@ -57,13 +57,14 @@ export const getBadgeListFromMoodle = async ({
   }
 };
 
-export const getVcBadgeCreateDate = async (
+export const getVcBadge = async (
   badgeClassId: string,
   lmsId: number,
-): Promise<Date> => {
+) => {
   const [badgeVcs] = await Promise.all([
     prisma.badgeVc.findFirst({
       select: {
+        badgeVcId: true,
         createdAt: true,
       },
       where: {
@@ -79,5 +80,5 @@ export const getVcBadgeCreateDate = async (
   if (!badgeVcs) {
     return null;
   }
-  return badgeVcs.createdAt;
+  return badgeVcs;
 };

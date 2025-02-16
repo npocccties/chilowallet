@@ -3,17 +3,17 @@ import axios from "axios";
 import { msEntraRetryConfig } from "@/configs/retry";
 import { loggerDebug, loggerError } from "@/lib/logger";
 import { retryRequest } from "@/lib/retryRequest";
-import { IfPortalBadgeDetail2, IfPortalBadgeDetail1 } from "@/types/BadgeInfo";
+import { IfPortalBadgeDetail1 } from "@/types/BadgeInfo";
 
 export const getPortalWisdomBadgeIds = async (): Promise<number[]> => {
   const requestUrl = process.env.portal_base_url + "/api/v1/badges/list/";
 
   loggerDebug(`getPortalWisdomBadgeIds requestUrl: ${requestUrl}`);
 
-  let results: IfPortalBadgeDetail2[];
+  let results: IfPortalBadgeDetail1[];
   try {
     results = await retryRequest(() => {
-      return axios.get(requestUrl).then((res) => res.data);
+      return axios.get(requestUrl).then((res) => res.data.badges);
     }, msEntraRetryConfig);
 
     loggerDebug(`getPortalWisdomBadgeIds results: ${JSON.stringify(results)}`);

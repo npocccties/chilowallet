@@ -21,7 +21,7 @@ export async function middleware(req: NextRequest) {
     loggerMWInfo(logEndForOther(`middleware access path ${pagePath.login.error}`));
     return res;
   }
-
+/*
   const session_cookie = req.cookies.get("session_cookie");
 
   if (!session_cookie) {
@@ -35,7 +35,7 @@ export async function middleware(req: NextRequest) {
     loggerMWInfo(`invalid access! redirect ${pagePath.login.error}`);
     return NextResponse.redirect(new URL(pagePath.login.error, req.url));
   }
-
+*/
   loggerMWInfo(logEndForOther("middleware"));
   return res;
 }

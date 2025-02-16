@@ -4,10 +4,11 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { errors } from "@/constants/error";
 import { logEndForApi, logStartForApi, logStatus } from "@/constants/log";
 import { convertUNIXorISOstrToJST, convertUTCtoJSTstr } from "@/lib/date";
-import { loggerDebug, loggerError, loggerInfo } from "@/lib/logger";
+import { loggerDebug, loggerError, loggerInfo, loggerWarn } from "@/lib/logger";
 import { getUserInfoFormJwt } from "@/lib/userInfo";
 import { findAllLmsList } from "@/server/repository/lmsList";
-import { getVcBadgeCreateDate } from "@/server/services/badgeList.service";
+import { submissionBadge } from "@/server/repository/submissionBadge";
+import { getVcBadge } from "@/server/services/badgeList.service";
 import { getCourseListFromMoodle } from "@/server/services/courseList.service";
 import { myBadgesList, myOpenBadge } from "@/server/services/lmsAccess.service";
 import { getPortalWisdomBadgeIds, getPortalWisdomBadges } from "@/server/services/portal.service";
@@ -25,6 +26,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
 
   const session_cookie = req.cookies.session_cookie;
   const { eppn } = getUserInfoFormJwt(session_cookie);
+  loggerDebug(`eppn: ${eppn}`);
 
   if (!eppn) {
     return res.status(401).json({ error: { errorMessage: errors.unAuthrizedError.detail.noSession } });
@@ -32,9 +34,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
 
   try {
     const walletId = await getWalletId(eppn);
+    loggerDebug(`walletId: ${walletId}`);
     const lmsList = await findAllLmsList();
+    loggerDebug(`lmsList: ${JSON.stringify(lmsList)}`);
     var response: BadgeStatusListResponse = { user_badgestatuslist: { lms_badge_count: 0, lms_badge_list: [], error_code: ""}};
     const badgeIds = await getPortalWisdomBadgeIds();
+    loggerDebug(`badgeIds: ${JSON.stringify(badgeIds)}`);
     if (badgeIds.length == 0) {
       loggerError(`badgesIds is empty.`);
       response.user_badgestatuslist.error_code = errors.E30000;
@@ -76,7 +81,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         const uniquehash = badge.uniquehash;
         try {
           const badgeMetaData = await myOpenBadge(uniquehash, lmsUrl);
-          loggerDebug(`badgeMetaData: ${JSON.stringify(badgeMetaData)}`);
+          loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}`);
           const badgeClassId = badgeMetaData.id;
           lmsBadgeMap.set(badgeClassId, badge);
         } catch (e) {
@@ -101,15 +106,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         const lmsId = lms.lmsId;
         const lmsBadge = lmsBadgeMap.get(badgeClassId);
-        const createDate = await getVcBadgeCreateDate(badgeClassId, lmsId);
+        var submission = false;
+        const vcBadge = await getVcBadge(badgeClassId, lmsId);
+        if (vcBadge) {
+          const submissioned = await submissionBadge({ badgeVcId: vcBadge.badgeVcId });
+          submission = submissioned.badgeVc != null;
+        }
         response.user_badgestatuslist.lms_badge_count++;
         response.user_badgestatuslist.lms_badge_list.push({
-          enrolled: course.completed != 0,
+          enrolled: course.completed != 0 || false,
           issued: lmsBadge.dateissued != 0,
-          imported: createDate != null,
+          imported: vcBadge.createdAt != null || false,
+          submission: submission,
           enrolled_at: convertUNIXorISOstrToJST(course.startdate),
           issued_at: convertUNIXorISOstrToJST(lmsBadge.dateissued),
-          imported_at: createDate != null ? convertUTCtoJSTstr(createDate) : "",
+          imported_at: convertUTCtoJSTstr(vcBadge.createdAt),
+          badge_expired_at: convertUNIXorISOstrToJST(course.dateexpire),
           badge_id: targetPortalBadge.badges_id,
           lms_id: lmsId,
           lms_name: lms.lmsName,
