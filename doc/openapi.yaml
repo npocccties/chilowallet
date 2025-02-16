@@ -412,6 +412,9 @@ components:
               imported:
                 type: boolean
                 description: 受領フラグ (ウォレットのDBにある状態)
+              submission:
+                type: boolean
+                description: 提出フラグ (キャビネットに提出済みの状態)
               enrolled_at:
                 type: string
                 format: date-time
@@ -424,6 +427,10 @@ components:
                 type: string
                 format: date-time
                 description: 受領日
+              badge_expired_at:
+                type: string
+                format: date-time
+                description: バッジ有効期限
               badge_id:
                 type: integer
                 format: int64
