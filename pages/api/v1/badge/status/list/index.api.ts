@@ -33,7 +33,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
   }
 
   try {
-    const walletId = await getWalletId(eppn);
+    var walletId = 0;
+    try {
+      walletId = await getWalletId(eppn);
+    } catch (e) {
+      loggerError(`Not found wallet. eppn: ${eppn}`);
+      response.user_badgestatuslist.error_code = errors.E20003;
+      return res.status(200).json(response);
+    }
     loggerDebug(`walletId: ${walletId}`);
     const lmsList = await findAllLmsList();
     loggerDebug(`lmsList: ${JSON.stringify(lmsList)}`);
@@ -45,8 +52,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       response.user_badgestatuslist.error_code = errors.E30000;
       return res.status(200).json(response);
     }
-    const portalWidomBadges = await getPortalWisdomBadges(badgeIds);
-    if (portalWidomBadges.length == 0) {
+    const portalBadges = await getPortalWisdomBadges(badgeIds);
+    if (portalBadges.length == 0) {
       loggerError(`portalWidomBadges is empty.`);
       response.user_badgestatuslist.error_code = errors.E30000;
       return res.status(200).json(response);
@@ -82,7 +89,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         try {
           const badgeMetaData = await myOpenBadge(uniquehash, lmsUrl);
           loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}`);
-          const badgeClassId = badgeMetaData.id;
+          const badgeClassId = badgeMetaData.badge.id;
           lmsBadgeMap.set(badgeClassId, badge);
         } catch (e) {
           loggerError(`Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
@@ -90,8 +97,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           return res.status(200).json(response);
         }
       }
-      for (const course of courseList) {
-        const targetPortalBadges = portalWidomBadges.filter(o => o.alignments_targeturl.indexOf(lmsUrl) != -1 && o.alignments_targeturl.indexOf(course.id.toString()) != -1)
+      for (const portalBadge of portalBadges) {
+        var courseId = "";
+        try {
+          const alignments_targeturl = new URL(portalBadge.alignments_targeturl);
+          courseId = alignments_targeturl.searchParams.get("id");
+        } catch (e) {
+          loggerWarn(`Invalid url. alignments_targeturl: ${portalBadge.alignments_targeturl}`);
+          continue;
+        }
+        const course = courseList.find(o => o.id.toString() == courseId);
+        if (!course) {
+          loggerDebug(`Not found course. alignments_targeturl: ${portalBadge.alignments_targeturl} courseId: ${courseId}`);
+          continue;
+        }
+        loggerDebug(`alignments_targeturl: ${portalBadge.alignments_targeturl} courseId: ${courseId} course: ${JSON.stringify(course)}`);
+        const targetPortalBadges = portalBadges.filter(o => o.alignments_targeturl.indexOf(lmsUrl) != -1 && o.alignments_targeturl.indexOf(course.id.toString()) != -1)
         if (targetPortalBadges.length == 0) {
           loggerError(`There is no badge information matching the course id[${course.id}] in the portal DB. lmsUrl: ${lmsUrl}`);
           response.user_badgestatuslist.error_code = errors.E20001;
@@ -100,7 +121,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         const targetPortalBadge = targetPortalBadges[0];
         const badgeClassId = targetPortalBadge.digital_badge_class_id;
         if (!lmsBadgeMap.has(badgeClassId)) {
-          loggerError(`There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl}`);
+          loggerError(`There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl} lmsBadgeMap.keys: ${[...lmsBadgeMap.keys()]}`);
           response.user_badgestatuslist.error_code = errors.E20002;
           return res.status(200).json(response);
         }
@@ -116,11 +137,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         response.user_badgestatuslist.lms_badge_list.push({
           enrolled: course.completed != 0 || false,
           issued: lmsBadge.dateissued != 0,
-          imported: vcBadge.createdAt != null || false,
+          imported: vcBadge != null || false,
           submission: submission,
-          enrolled_at: convertUNIXorISOstrToJST(course.startdate),
+          enrolled_at: convertUNIXorISOstrToJST(course?.startdate),
           issued_at: convertUNIXorISOstrToJST(lmsBadge.dateissued),
-          imported_at: convertUTCtoJSTstr(vcBadge.createdAt),
+          imported_at: convertUTCtoJSTstr(vcBadge?.createdAt),
           badge_expired_at: convertUNIXorISOstrToJST(course.dateexpire),
           badge_id: targetPortalBadge.badges_id,
           lms_id: lmsId,
