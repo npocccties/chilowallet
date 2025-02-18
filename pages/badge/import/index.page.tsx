@@ -11,13 +11,13 @@ import { pageName, pagePath } from "@/constants";
 import { errors } from "@/constants/error";
 import { logEndForPageSSR, logStartForPageSSR, logStatus } from "@/constants/log";
 import { loggerError, loggerInfo } from "@/lib/logger";
-import { LmsList } from "@/lib/prisma";
 import { getUserInfoFormJwt } from "@/lib/userInfo";
-import { findAllLmsList } from "@/server/repository/lmsList";
+import { findAllSafeLmsList } from "@/server/repository/lmsList";
 import { getWalletId } from "@/server/services/wallet.service";
+import { SafeLmsList } from "@/types/lms";
 
 type Props = {
-  lmsList: LmsList[];
+  lmsList: SafeLmsList[];
 };
 
 const page = pagePath.badge.import;
@@ -36,7 +36,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }): Promise<G
   }
 
   try {
-    const lmsList = await findAllLmsList();
+    const lmsList = await findAllSafeLmsList();
 
     loggerInfo(`${logStatus.success} ${page}`);
     loggerInfo(logEndForPageSSR(page));
