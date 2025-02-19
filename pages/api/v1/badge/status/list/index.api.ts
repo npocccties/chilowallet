@@ -16,7 +16,7 @@ import { getWalletId } from "@/server/services/wallet.service";
 import { api } from "@/share/api";
 import { BadgeStatusListResponse } from "@/types/api/badge";
 import { ErrorResponse } from "@/types/api/error";
-import { IfBadgeInfo, IfCourseInfo } from "@/types/BadgeInfo";
+import { IfBadgeInfo, IfCourseInfo, IfUserBadgeStatus } from "@/types/BadgeInfo";
 
 const apiPath = api.v1.badge.status_list;
 
@@ -59,6 +59,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       return res.status(200).json(response);
     }
     for (const lms of lmsList) {
+      if (!lms.ssoEnabled) {
+        continue;
+      }
       const lmsId = lms.lmsId;
       loggerDebug(`lms: ${JSON.stringify(lms)}`);
       var courseList: IfCourseInfo[] = [];
@@ -97,29 +100,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           return res.status(200).json(response);
         }
       }
+      var lms_badge_list: IfUserBadgeStatus[] = [];
       for (const portalBadge of portalBadges) {
+        loggerDebug(`portalBadge.badges_id: ${portalBadge.badges_id} lmsId: ${lms.lmsId}`);
+        var existBadge = lms_badge_list.find(o => o.badge_id == portalBadge.badges_id && o.lms_id == lms.lmsId);
+        if (existBadge) {
+          loggerWarn(`Duplicate portal badge: badgeId: ${portalBadge.badges_id} lmsUrl: ${lmsUrl}`);
+          continue;
+        }
         var courseId = "";
         try {
           const alignments_targeturl = new URL(portalBadge.alignments_targeturl);
           courseId = alignments_targeturl.searchParams.get("id");
         } catch (e) {
-          loggerWarn(`Invalid url. alignments_targeturl: ${portalBadge.alignments_targeturl}`);
+          loggerWarn(`Invalid url. alignments_targeturl: ${portalBadge.alignments_targeturl} lmsUrl: ${lmsUrl}`);
           continue;
         }
         const course = courseList.find(o => o.id.toString() == courseId);
         if (!course) {
-          loggerDebug(`Not found course. alignments_targeturl: ${portalBadge.alignments_targeturl} courseId: ${courseId}`);
+          loggerWarn(`Not found course. alignments_targeturl: ${portalBadge.alignments_targeturl} courseId: ${courseId}`);
           continue;
         }
         loggerDebug(`alignments_targeturl: ${portalBadge.alignments_targeturl} courseId: ${courseId} course: ${JSON.stringify(course)}`);
-        const targetPortalBadges = portalBadges.filter(o => o.alignments_targeturl.indexOf(lmsUrl) != -1 && o.alignments_targeturl.indexOf(course.id.toString()) != -1)
-        if (targetPortalBadges.length == 0) {
+        if (portalBadge.alignments_targeturl.indexOf(lmsUrl) == -1 || portalBadge.alignments_targeturl.indexOf(course.id.toString()) == -1) {
           loggerError(`There is no badge information matching the course id[${course.id}] in the portal DB. lmsUrl: ${lmsUrl}`);
           response.user_badgestatuslist.error_code = errors.E20001;
           return res.status(200).json(response);
         }
-        const targetPortalBadge = targetPortalBadges[0];
-        const badgeClassId = targetPortalBadge.digital_badge_class_id;
+        const badgeClassId = portalBadge.digital_badge_class_id;
         if (!lmsBadgeMap.has(badgeClassId)) {
           loggerError(`There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl} lmsBadgeMap.keys: ${[...lmsBadgeMap.keys()]}`);
           response.user_badgestatuslist.error_code = errors.E20002;
@@ -134,7 +142,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           submission = submissioned.badgeVc != null;
         }
         response.user_badgestatuslist.lms_badge_count++;
-        response.user_badgestatuslist.lms_badge_list.push({
+        lms_badge_list.push({
           enrolled: course.completed != 0 || false,
           issued: lmsBadge.dateissued != 0,
           imported: vcBadge != null || false,
@@ -143,13 +151,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           issued_at: convertUNIXorISOstrToJST(lmsBadge.dateissued),
           imported_at: convertUTCtoJSTstr(vcBadge?.createdAt),
           badge_expired_at: convertUNIXorISOstrToJST(course.dateexpire),
-          badge_id: targetPortalBadge.badges_id,
+          badge_id: portalBadge.badges_id,
           lms_id: lmsId,
           lms_name: lms.lmsName,
         });
       }
     }
-
+    response.user_badgestatuslist.lms_badge_list = lms_badge_list;
     loggerDebug(`response: ${JSON.stringify(response)}`);
     loggerInfo(`${logStatus.success} ${apiPath}`);
 
