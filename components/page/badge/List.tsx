@@ -11,7 +11,6 @@ import {
   useDisclosure,
   AlertDialogFooter,
 } from "@chakra-ui/react";
-import { LmsList } from "@prisma/client";
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
 import { Loading } from "@/components/Loading";
@@ -21,12 +20,13 @@ import { MyBadgesList, MyBadgesListSp } from "@/components/ui/table/MybadgeList"
 import { badgeListActions, badgeListGetters } from "@/share/store/badgeList/main";
 import { badgeMetaDataActions } from "@/share/store/badgeMetaData/main";
 import { selectBadgeActions, selectBadgeGetters } from "@/share/store/selectBadge/main";
+import { SafeLmsList } from "@/types/lms";
 
 export const BadgeList = ({
   lmsList,
   setIsBadgeSelect,
 }: {
-  lmsList: LmsList[];
+  lmsList: SafeLmsList[];
   setIsBadgeSelect: Dispatch<SetStateAction<boolean>>;
 }) => {
   const cancelRef = useRef();
