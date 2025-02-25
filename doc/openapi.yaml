@@ -435,6 +435,9 @@ components:
                 type: integer
                 format: int64
                 description: '能力バッジID（ポータルDB）'
+              badge_detail_url:
+                type: string
+                description: '能力バッジの詳細ページ'
               lms_id:
                 type: integer
                 description: 'LMSのID'

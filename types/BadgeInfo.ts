@@ -114,6 +114,7 @@ export interface IfUserBadgeStatus {
   imported_at: string;
   badge_expired_at: string;
   badge_id: number;
+  badge_detail_url: string;
   lms_id: number;
   lms_name: string;
 }
