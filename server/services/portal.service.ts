@@ -6,14 +6,16 @@ import { retryRequest } from "@/lib/retryRequest";
 import { IfPortalBadgeDetail1 } from "@/types/BadgeInfo";
 
 export const getPortalWisdomBadgeIds = async (): Promise<number[]> => {
-  const requestUrl = new URL("/api/v1/badges/list/", process.env.portal_base_url);
+  const portalBaseUrl = process.env.portal_base_url || "";
+  const baseUrl = portalBaseUrl.endsWith("/") ? portalBaseUrl.slice(0, -1) : portalBaseUrl;
+  const requestUrl = baseUrl + "/api/v1/badges/list/";
 
   loggerDebug(`getPortalWisdomBadgeIds requestUrl: ${requestUrl}`);
 
   let results: IfPortalBadgeDetail1[];
   try {
     results = await retryRequest(() => {
-      return axios.get(requestUrl.href).then((res) => res.data.badges);
+      return axios.get(requestUrl).then((res) => res.data.badges);
     }, msEntraRetryConfig);
 
     loggerDebug(`getPortalWisdomBadgeIds results: ${JSON.stringify(results)}`);
@@ -26,7 +28,9 @@ export const getPortalWisdomBadgeIds = async (): Promise<number[]> => {
 };
 
 export const getPortalWisdomBadges = async (badgeIds: number[]): Promise<IfPortalBadgeDetail1[]> => {
-  const requestUrl = process.env.portal_base_url + `/api/v1/badges/?badges_ids=${badgeIds.join(",")}&badges_type=wisdom`;
+  const portalBaseUrl = process.env.portal_base_url || "";
+  const baseUrl = portalBaseUrl.endsWith("/") ? portalBaseUrl.slice(0, -1) : portalBaseUrl;
+  const requestUrl = baseUrl + `/api/v1/badges/?badges_ids=${badgeIds.join(",")}&badges_type=wisdom`;
 
   loggerDebug(`getPortalWisdomBadges requestUrl: ${requestUrl}`);
 
