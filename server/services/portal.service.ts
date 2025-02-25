@@ -6,14 +6,14 @@ import { retryRequest } from "@/lib/retryRequest";
 import { IfPortalBadgeDetail1 } from "@/types/BadgeInfo";
 
 export const getPortalWisdomBadgeIds = async (): Promise<number[]> => {
-  const requestUrl = process.env.portal_base_url + "/api/v1/badges/list/";
+  const requestUrl = new URL("/api/v1/badges/list/", process.env.portal_base_url);
 
   loggerDebug(`getPortalWisdomBadgeIds requestUrl: ${requestUrl}`);
 
   let results: IfPortalBadgeDetail1[];
   try {
     results = await retryRequest(() => {
-      return axios.get(requestUrl).then((res) => res.data.badges);
+      return axios.get(requestUrl.href).then((res) => res.data.badges);
     }, msEntraRetryConfig);
 
     loggerDebug(`getPortalWisdomBadgeIds results: ${JSON.stringify(results)}`);

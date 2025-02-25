@@ -435,9 +435,9 @@ components:
                 type: integer
                 format: int64
                 description: '能力バッジID（ポータルDB）'
-              badge_detail_url:
-                type: string
-                description: '能力バッジの詳細ページ'
+              badge_vc_id:
+                type: integer
+                description: 'バッジVCID（能力バッジの詳細ページのパスに指定する番号）'
               lms_id:
                 type: integer
                 description: 'LMSのID'
@@ -451,6 +451,9 @@ components:
               - badge_id
               - lms_id
               - lms_name
+        badge_detail_base_url:
+          type: string
+          description: 'バッジ詳細ページのベースURL（パスの部分にはbadge_vc_idの番号を指定する ex. https://dev-wallet.xxx.org/credential/detail/252）'
         error_code:
           type: string
           description: |

@@ -101,6 +101,7 @@ export interface IfUserInfo {
 export interface IfUserBadgeStatusList {
   lms_badge_count: number;
   lms_badge_list: IfUserBadgeStatus[];
+  badge_detail_base_url: string;
   error_code: string;
 }
 
@@ -114,7 +115,7 @@ export interface IfUserBadgeStatus {
   imported_at: string;
   badge_expired_at: string;
   badge_id: number;
-  badge_detail_url: string;
+  badge_vc_id: number;
   lms_id: number;
   lms_name: string;
 }

@@ -44,7 +44,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     loggerDebug(`walletId: ${walletId}`);
     const lmsList = await findAllLmsList();
     loggerDebug(`lmsList: ${JSON.stringify(lmsList)}`);
-    var response: BadgeStatusListResponse = { user_badgestatuslist: { lms_badge_count: 0, lms_badge_list: [], error_code: ""}};
+    const host = req.headers.host;
+    const protocol = req.headers["x-forwarded-proto"] || "http"; // HTTP or HTTPS
+    const fqdn = `${protocol}://${host}`;
+    var response: BadgeStatusListResponse = { user_badgestatuslist: { lms_badge_count: 0, lms_badge_list: [], badge_detail_base_url: `${fqdn}/credential/detail`, error_code: ""}};
     const badgeIds = await getPortalWisdomBadgeIds();
     loggerDebug(`badgeIds: ${JSON.stringify(badgeIds)}`);
     if (badgeIds.length == 0) {
@@ -145,9 +148,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
             submission = submissioned.badgeVc != null;
           }
         }
-        const host = req.headers.host;
-        const protocol = req.headers["x-forwarded-proto"] || "http"; // HTTP or HTTPS
-        const fqdn = `${protocol}://${host}`;
         response.user_badgestatuslist.lms_badge_count++;
         lms_badge_list.push({
           enrolled: course.completed != 0 || false,
@@ -159,7 +159,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           imported_at: convertUTCtoJSTstr(vcBadge?.createdAt),
           badge_expired_at: convertUNIXorISOstrToJST(course.dateexpire),
           badge_id: portalBadge.badges_id,
-          badge_detail_url: vcBadge != null ? `${fqdn}/credential/detail/${vcBadge.badgeVcId}` : null,
+          badge_vc_id: vcBadge != null ? vcBadge.badgeVcId : null,
           lms_id: lmsId,
           lms_name: lms.lmsName,
         });
