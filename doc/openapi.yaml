@@ -465,7 +465,6 @@ components:
             空: 正常
       required:
         - lms_badge_count
-        - error_code
 
     vcList:
       type: object
