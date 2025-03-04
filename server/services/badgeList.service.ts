@@ -59,6 +59,7 @@ export const getBadgeListFromMoodle = async ({
 
 export const getVcBadge = async (
   badgeClassId: string,
+  walletId: number,
   lmsId: number,
 ) => {
   const [badgeVcs] = await Promise.all([
@@ -69,10 +70,7 @@ export const getVcBadge = async (
       },
       where: {
         badgeClassId: badgeClassId,
-      },
-    }),
-    prisma.lmsList.findUnique({
-      where: {
+        walletId: walletId,
         lmsId: lmsId,
       },
     }),

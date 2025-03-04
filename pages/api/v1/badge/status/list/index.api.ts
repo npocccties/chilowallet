@@ -140,7 +140,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         const lmsId = lms.lmsId;
         const lmsBadge = lmsBadgeMap.get(badgeClassId);
         var submission = false;
-        const vcBadge = await getVcBadge(badgeClassId, lmsId);
+        const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
         loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
         if (vcBadge) {
           const submissioned = await submissionBadge({ badgeVcId: vcBadge.badgeVcId });
