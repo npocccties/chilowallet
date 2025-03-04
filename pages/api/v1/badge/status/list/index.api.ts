@@ -157,7 +157,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           enrolled_at: convertUNIXorISOstrToJST(course?.startdate),
           issued_at: convertUNIXorISOstrToJST(lmsBadge.dateissued),
           imported_at: convertUTCtoJSTstr(vcBadge?.createdAt),
-          badge_expired_at: convertUNIXorISOstrToJST(course.dateexpire),
+          badge_expired_at: convertUTCtoJSTstr(vcBadge?.badgeExpires),
           badge_id: portalBadge.badges_id,
           badge_vc_id: vcBadge != null ? vcBadge.badgeVcId : null,
           lms_id: lmsId,

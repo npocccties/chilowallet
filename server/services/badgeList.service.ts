@@ -66,6 +66,7 @@ export const getVcBadge = async (
     prisma.badgeVc.findFirst({
       select: {
         badgeVcId: true,
+        badgeExpires: true,
         createdAt: true,
       },
       where: {
