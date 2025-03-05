@@ -109,7 +109,7 @@ export interface IfUserBadgeStatus {
   enrolled: boolean;
   issued: boolean;
   imported: boolean;
-  submission: boolean;
+  submitted: boolean;
   enrolled_at: string;
   issued_at: string;
   imported_at: string;

@@ -139,13 +139,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         const lmsId = lms.lmsId;
         const lmsBadge = lmsBadgeMap.get(badgeClassId);
-        var submission = false;
+        var submitted = false;
         const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
         loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
         if (vcBadge) {
-          const submissioned = await submissionBadge({ badgeVcId: vcBadge.badgeVcId });
-          if (submissioned) {
-            submission = submissioned.badgeVc != null;
+          const submittedBadge = await submissionBadge({ badgeVcId: vcBadge.badgeVcId });
+          if (submittedBadge) {
+            submitted = submittedBadge.badgeVc != null;
           }
         }
         response.user_badgestatuslist.lms_badge_count++;
@@ -153,7 +153,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           enrolled: course.completed != 0 || false,
           issued: lmsBadge.dateissued != 0,
           imported: vcBadge != null || false,
-          submission: submission,
+          submitted: submitted,
           enrolled_at: convertUNIXorISOstrToJST(course?.startdate),
           issued_at: convertUNIXorISOstrToJST(lmsBadge.dateissued),
           imported_at: convertUTCtoJSTstr(vcBadge?.createdAt),

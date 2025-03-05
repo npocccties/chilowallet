@@ -412,7 +412,7 @@ components:
               imported:
                 type: boolean
                 description: 受領フラグ (ウォレットのDBにある状態)
-              submission:
+              submitted:
                 type: boolean
                 description: 提出フラグ (キャビネットに提出済みの状態)
               enrolled_at:
