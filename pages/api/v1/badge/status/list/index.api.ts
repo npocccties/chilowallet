@@ -37,7 +37,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     try {
       walletId = await getWalletId(eppn);
     } catch (e) {
-      loggerError(`Not found wallet. eppn: ${eppn}`);
+      loggerError(`${errors.E20003}: Not found wallet. eppn: ${eppn}`);
       response.user_badgestatuslist.error_code = errors.E20003;
       return res.status(200).json(response);
     }
@@ -51,13 +51,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     const badgeIds = await getPortalWisdomBadgeIds();
     loggerDebug(`badgeIds: ${JSON.stringify(badgeIds)}`);
     if (badgeIds.length == 0) {
-      loggerError(`badgesIds is empty.`);
+      loggerError(`${errors.E30000}: badgesIds is empty.`);
       response.user_badgestatuslist.error_code = errors.E30000;
       return res.status(200).json(response);
     }
     const portalBadges = await getPortalWisdomBadges(badgeIds);
     if (portalBadges.length == 0) {
-      loggerError(`portalWidomBadges is empty.`);
+      loggerError(`${errors.E30000}: portalWidomBadges is empty.`);
       response.user_badgestatuslist.error_code = errors.E30000;
       return res.status(200).json(response);
     }
@@ -66,6 +66,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         continue;
       }
       const lmsId = lms.lmsId;
+      const lmsUrl = lms.lmsUrl;
       loggerDebug(`lms: ${JSON.stringify(lms)}`);
       var courseList: IfCourseInfo[] = [];
       try {
@@ -78,15 +79,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         } else {
           response.user_badgestatuslist.error_code = errors.E29999;
         }
+        loggerError(`${response.user_badgestatuslist.error_code}: Failed to getCourseListFromMoodle. eppn: ${eppn} lmsUrl: ${lmsUrl}`);
         return res.status(200).json(response);
       }
-      const lmsUrl = lms.lmsUrl;
       var lmsBadgeMap = new Map<string, IfBadgeInfo>();
       var badgeList: IfBadgeInfo[];
       try {
         badgeList = await myBadgesList(eppn, "", lms);
       } catch (e) {
-        loggerError(`Failed to retrieve the badge list from the LMS. eppn: ${eppn}`);
+        loggerError(`${errors.E10002}: Failed to retrieve the badge list from the LMS. eppn: ${eppn} lmsUrl: ${lmsUrl}`);
         response.user_badgestatuslist.error_code = errors.E10002;
         return res.status(200).json(response);
       }
@@ -98,7 +99,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           const badgeClassId = badgeMetaData.badge.id;
           lmsBadgeMap.set(badgeClassId, badge);
         } catch (e) {
-          loggerError(`Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
+          loggerError(`${errors.E20001}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
           response.user_badgestatuslist.error_code = errors.E20001;
           return res.status(200).json(response);
         }
@@ -126,14 +127,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         loggerDebug(`alignments_targeturl: ${portalBadge.alignments_targeturl} courseId: ${courseId} course: ${JSON.stringify(course)}`);
         if (portalBadge.alignments_targeturl.indexOf(lmsUrl) == -1 || portalBadge.alignments_targeturl.indexOf(course.id.toString()) == -1) {
-          loggerError(`There is no badge information matching the course id[${course.id}] in the portal DB. lmsUrl: ${lmsUrl}`);
+          loggerError(`${errors.E20001}: There is no badge information matching the course id[${course.id}] in the portal DB. lmsUrl: ${lmsUrl}`);
           response.user_badgestatuslist.error_code = errors.E20001;
           return res.status(200).json(response);
         }
         const badgeClassId = portalBadge.digital_badge_class_id;
         loggerDebug(`badgeClassId: ${badgeClassId}`);
         if (!lmsBadgeMap.has(badgeClassId)) {
-          loggerError(`There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl} lmsBadgeMap.keys: ${[...lmsBadgeMap.keys()]}`);
+          loggerError(`${errors.E20002}: There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl} lmsBadgeMap.keys: ${[...lmsBadgeMap.keys()]}`);
           response.user_badgestatuslist.error_code = errors.E20002;
           return res.status(200).json(response);
         }
