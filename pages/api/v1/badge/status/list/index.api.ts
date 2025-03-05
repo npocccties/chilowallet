@@ -17,6 +17,7 @@ import { api } from "@/share/api";
 import { BadgeStatusListResponse } from "@/types/api/badge";
 import { ErrorResponse } from "@/types/api/error";
 import { IfBadgeInfo, IfCourseInfo, IfUserBadgeStatus } from "@/types/BadgeInfo";
+import { credentialDetail } from "@/server/repository/credentialDetail";
 
 const apiPath = api.v1.badge.status_list;
 
@@ -144,9 +145,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
         loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
         if (vcBadge) {
-          const submittedBadge = await submissionBadge({ badgeVcId: vcBadge.badgeVcId });
+          const submittedBadge = await credentialDetail({ badgeVcId: vcBadge.badgeVcId, walletId: walletId });
           if (submittedBadge) {
-            submitted = submittedBadge.badgeVc != null;
+            submitted = submittedBadge.submissions != null;
           }
         }
         response.user_badgestatuslist.lms_badge_count++;
