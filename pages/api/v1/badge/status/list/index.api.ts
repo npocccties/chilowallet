@@ -128,14 +128,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         loggerDebug(`alignments_targeturl: ${portalBadge.alignments_targeturl} courseId: ${courseId} course: ${JSON.stringify(course)}`);
         if (portalBadge.alignments_targeturl.indexOf(lmsUrl) == -1 || portalBadge.alignments_targeturl.indexOf(course.id.toString()) == -1) {
-          loggerError(`${errors.E20001}: There is no badge information matching the course id[${course.id}] in the portal DB. lmsUrl: ${lmsUrl}`);
+          loggerWarn(`${errors.E20001}: There is no badge information matching the course id[${course.id}] in the portal DB. lmsUrl: ${lmsUrl}`);
           errorCodes.push(errors.E20001);
           continue;
         }
         const badgeClassId = portalBadge.digital_badge_class_id;
         loggerDebug(`badgeClassId: ${badgeClassId}`);
         if (!lmsBadgeMap.has(badgeClassId)) {
-          loggerError(`${errors.E20002}: There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl} lmsBadgeMap.keys: ${[...lmsBadgeMap.keys()]}`);
+          loggerWarn(`${errors.E20002}: There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl} lmsBadgeMap.keys: ${[...lmsBadgeMap.keys()]}`);
           errorCodes.push(errors.E20002);
           continue;
         }
