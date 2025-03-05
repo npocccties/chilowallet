@@ -62,6 +62,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       return res.status(200).json(response);
     }
     let errorCodes: string[] = [];
+    var lms_badge_list: IfUserBadgeStatus[] = [];
     for (const lms of lmsList) {
       if (!lms.ssoEnabled) {
         continue;
@@ -105,7 +106,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           continue;
         }
       }
-      var lms_badge_list: IfUserBadgeStatus[] = [];
       for (const portalBadge of portalBadges) {
         loggerDebug(`portalBadge.badges_id: ${portalBadge.badges_id} lmsId: ${lms.lmsId}`);
         var existBadge = lms_badge_list.find(o => o.badge_id == portalBadge.badges_id && o.lms_id == lms.lmsId);
