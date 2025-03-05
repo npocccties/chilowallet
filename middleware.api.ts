@@ -24,6 +24,10 @@ export async function middleware(req: NextRequest) {
   const session_cookie = req.cookies.get("session_cookie");
 
   if (!session_cookie) {
+    if (url.pathname == api.v1.badge.status_list) {
+      loggerMWInfo(`no session_cookie! returning 401 Unauthorized`);
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
     loggerMWInfo(`no session_cookie! redirect to ${redirectUrl}`);
     return NextResponse.redirect(new URL(redirectUrl, req.url));
   }
