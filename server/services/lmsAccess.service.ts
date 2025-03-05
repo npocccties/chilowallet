@@ -144,7 +144,7 @@ const getMyCourses = async (token: string, selectLms: LmsList, userid: number): 
     return data;
   } catch (err) {
     loggerError(`${logStatus.error}`, err.message);
-    throw err;
+    throw new Error("getMyCourses");
   }
 };
 
@@ -181,7 +181,7 @@ export const myCoursesList = async (username: string, selectLms: LmsList): Promi
     return coursesInfos;
   } catch (err) {
     loggerError(`${logStatus.error} server/service/lmsAccess.service myCoursesList`);
-    throw new Error("myCoursesList");
+    throw err;
   }
 };
 

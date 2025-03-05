@@ -61,6 +61,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       response.user_badgestatuslist.error_code = errors.E30000;
       return res.status(200).json(response);
     }
+    let errorCodes: string[] = [];
     for (const lms of lmsList) {
       if (!lms.ssoEnabled) {
         continue;
@@ -73,23 +74,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         courseList = await getCourseListFromMoodle({ walletId, username: eppn, lmsId });
       } catch (e) {
         if (e.message.indexOf("getUserByUsername") != -1) {
-          response.user_badgestatuslist.error_code = errors.E10000;
-        } else if (e.message.indexOf("myCoursesList") != -1) {
-          response.user_badgestatuslist.error_code = errors.E10001;
+          errorCodes.push(errors.E10000);
+        } else if (e.message.indexOf("getMyCourses") != -1) {
+          errorCodes.push(errors.E10001);
         } else {
-          response.user_badgestatuslist.error_code = errors.E29999;
+          errorCodes.push(errors.E29999);
         }
-        loggerError(`${response.user_badgestatuslist.error_code}: Failed to getCourseListFromMoodle. eppn: ${eppn} lmsUrl: ${lmsUrl}`);
-        return res.status(200).json(response);
+        loggerWarn(`${errorCodes.at(-1)}: $Failed to getCourseListFromMoodle. eppn: ${eppn} lmsUrl: ${lmsUrl}`);
+        continue;
       }
       var lmsBadgeMap = new Map<string, IfBadgeInfo>();
       var badgeList: IfBadgeInfo[];
       try {
         badgeList = await myBadgesList(eppn, "", lms);
       } catch (e) {
-        loggerError(`${errors.E10002}: Failed to retrieve the badge list from the LMS. eppn: ${eppn} lmsUrl: ${lmsUrl}`);
-        response.user_badgestatuslist.error_code = errors.E10002;
-        return res.status(200).json(response);
+        loggerWarn(`${errors.E10002}: Failed to retrieve the badge list from the LMS. eppn: ${eppn} lmsUrl: ${lmsUrl}`);
+        errorCodes.push(errors.E10002);
+        continue;
       }
       for (const badge of badgeList) {
         const uniquehash = badge.uniquehash;
@@ -99,9 +100,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           const badgeClassId = badgeMetaData.badge.id;
           lmsBadgeMap.set(badgeClassId, badge);
         } catch (e) {
-          loggerError(`${errors.E20001}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
-          response.user_badgestatuslist.error_code = errors.E20001;
-          return res.status(200).json(response);
+          loggerWarn(`${errors.E20001}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
+          errorCodes.push(errors.E20001);
+          continue;
         }
       }
       var lms_badge_list: IfUserBadgeStatus[] = [];
@@ -128,15 +129,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         loggerDebug(`alignments_targeturl: ${portalBadge.alignments_targeturl} courseId: ${courseId} course: ${JSON.stringify(course)}`);
         if (portalBadge.alignments_targeturl.indexOf(lmsUrl) == -1 || portalBadge.alignments_targeturl.indexOf(course.id.toString()) == -1) {
           loggerError(`${errors.E20001}: There is no badge information matching the course id[${course.id}] in the portal DB. lmsUrl: ${lmsUrl}`);
-          response.user_badgestatuslist.error_code = errors.E20001;
-          return res.status(200).json(response);
+          errorCodes.push(errors.E20001);
+          continue;
         }
         const badgeClassId = portalBadge.digital_badge_class_id;
         loggerDebug(`badgeClassId: ${badgeClassId}`);
         if (!lmsBadgeMap.has(badgeClassId)) {
           loggerError(`${errors.E20002}: There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl} lmsBadgeMap.keys: ${[...lmsBadgeMap.keys()]}`);
-          response.user_badgestatuslist.error_code = errors.E20002;
-          return res.status(200).json(response);
+          errorCodes.push(errors.E20002);
+          continue;
         }
         const lmsId = lms.lmsId;
         const lmsBadge = lmsBadgeMap.get(badgeClassId);
@@ -165,6 +166,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           lms_name: lms.lmsName,
         });
       }
+    }
+    if (errorCodes.length != 0) {
+      response.user_badgestatuslist.error_code = errorCodes.at(0);
     }
     response.user_badgestatuslist.lms_badge_list = lms_badge_list;
     loggerDebug(`response: ${JSON.stringify(response)}`);
