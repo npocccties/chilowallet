@@ -6,8 +6,8 @@ import { logEndForApi, logStartForApi, logStatus } from "@/constants/log";
 import { convertUNIXorISOstrToJST, convertUTCtoJSTstr } from "@/lib/date";
 import { loggerDebug, loggerError, loggerInfo, loggerWarn } from "@/lib/logger";
 import { getUserInfoFormJwt } from "@/lib/userInfo";
+import { credentialDetail } from "@/server/repository/credentialDetail";
 import { findAllLmsList } from "@/server/repository/lmsList";
-import { submissionBadge } from "@/server/repository/submissionBadge";
 import { getVcBadge } from "@/server/services/badgeList.service";
 import { getCourseListFromMoodle } from "@/server/services/courseList.service";
 import { myBadgesList, myOpenBadge } from "@/server/services/lmsAccess.service";
@@ -17,7 +17,6 @@ import { api } from "@/share/api";
 import { BadgeStatusListResponse } from "@/types/api/badge";
 import { ErrorResponse } from "@/types/api/error";
 import { IfBadgeInfo, IfCourseInfo, IfUserBadgeStatus } from "@/types/BadgeInfo";
-import { credentialDetail } from "@/server/repository/credentialDetail";
 
 const apiPath = api.v1.badge.status_list;
 
