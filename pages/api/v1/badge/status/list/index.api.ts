@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { errors } from "@/constants/error";
 import { logEndForApi, logStartForApi, logStatus } from "@/constants/log";
-import { convertUNIXorISOstrToJST, convertUTCtoJSTstr, JSTdateToDisplay } from "@/lib/date";
+import { convertUNIXorISOstrToJST, convertUTCtoJSTstr } from "@/lib/date";
 import { loggerDebug, loggerError, loggerInfo, loggerWarn } from "@/lib/logger";
 import { getUserInfoFormJwt } from "@/lib/userInfo";
 import { credentialDetail } from "@/server/repository/credentialDetail";
