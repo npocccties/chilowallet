@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { errors } from "@/constants/error";
 import { logEndForApi, logStartForApi, logStatus } from "@/constants/log";
-import { convertUNIXorISOstrToJST, convertUTCtoJSTstr } from "@/lib/date";
+import { convertUNIXorISOstrToJST, convertUTCtoJSTstr, JSTdateToDisplay } from "@/lib/date";
 import { loggerDebug, loggerError, loggerInfo, loggerWarn } from "@/lib/logger";
 import { getUserInfoFormJwt } from "@/lib/userInfo";
 import { credentialDetail } from "@/server/repository/credentialDetail";
@@ -17,6 +17,7 @@ import { api } from "@/share/api";
 import { BadgeStatusListResponse } from "@/types/api/badge";
 import { ErrorResponse } from "@/types/api/error";
 import { IfBadgeInfo, IfCourseInfo, IfUserBadgeStatus } from "@/types/BadgeInfo";
+import { BadgeMetaData } from "@/types/badgeInfo/metaData";
 
 const apiPath = api.v1.badge.status_list;
 
@@ -85,6 +86,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         continue;
       }
       var lmsBadgeMap = new Map<string, IfBadgeInfo>();
+      var badgeMetaDataMap = new Map<string, BadgeMetaData>();
       var badgeList: IfBadgeInfo[];
       try {
         badgeList = await myBadgesList(eppn, "", lms);
@@ -100,6 +102,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}`);
           const badgeClassId = badgeMetaData.badge.id;
           lmsBadgeMap.set(badgeClassId, badge);
+          badgeMetaDataMap.set(badgeClassId, badgeMetaData);
         } catch (e) {
           loggerWarn(`${errors.E20001}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
           errorCodes.push(errors.E20001);
@@ -141,6 +144,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         const lmsId = lms.lmsId;
         const lmsBadge = lmsBadgeMap.get(badgeClassId);
+        const badgeMetaData = badgeMetaDataMap.get(badgeClassId);
         var submitted = false;
         const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
         loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
@@ -159,7 +163,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           enrolled_at: convertUNIXorISOstrToJST(course?.startdate),
           issued_at: convertUNIXorISOstrToJST(lmsBadge.dateissued),
           imported_at: convertUTCtoJSTstr(vcBadge?.createdAt),
-          badge_expired_at: convertUTCtoJSTstr(vcBadge?.badgeExpires),
+          badge_expired_at: badgeMetaData.expires?.toString(),
           badge_id: portalBadge.badges_id,
           badge_vc_id: vcBadge != null ? vcBadge.badgeVcId : null,
           lms_id: lmsId,
