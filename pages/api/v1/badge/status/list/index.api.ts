@@ -137,26 +137,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         const badgeClassId = portalBadge.digital_badge_class_id;
         loggerDebug(`badgeClassId: ${badgeClassId}`);
-        const lmsId = lms.lmsId;
         if (!lmsBadgeMap.has(badgeClassId)) {
           loggerWarn(`${errors.E20002}: There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl} lmsBadgeMap.keys: ${[...lmsBadgeMap.keys()]}`);
           errorCodes.push(errors.E20002);
-          lms_badge_list.push({
-            enrolled: course.completed != 0 || false,
-            issued: false,
-            imported: false,
-            submitted: submitted,
-            enrolled_at: convertUNIXorISOstrToJST(course?.startdate),
-            issued_at: null,
-            imported_at: null,
-            badge_expired_at: null,
-            badge_id: portalBadge.badges_id,
-            badge_vc_id: null,
-            lms_id: lmsId,
-            lms_name: lms.lmsName,
-          });
           continue;
         }
+        const lmsId = lms.lmsId;
         const lmsBadge = lmsBadgeMap.get(badgeClassId);
         const badgeMetaData = badgeMetaDataMap.get(badgeClassId);
         var submitted = false;

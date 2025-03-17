@@ -408,7 +408,7 @@ components:
                 description: 受講フラグ (LMSコース一覧取得APIのリストにあり、LMSからバッジ取得できない状態) 
               issued:
                 type: boolean
-                description: 発行フラグ (LMSからバッジ取得できるがポータルのDBにない状態) 
+                description: 発行フラグ (LMSからバッジ取得できるがウォレットのDBにない状態) 
               imported:
                 type: boolean
                 description: 受領フラグ (ウォレットのDBにある状態)
