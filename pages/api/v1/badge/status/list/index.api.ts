@@ -35,6 +35,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
 
   try {
     var walletId = 0;
+    let response: BadgeStatusListResponse = { user_badgestatuslist: { lms_badge_count: 0, lms_badge_list: [], badge_detail_base_url: `${fqdn}/credential/detail`, error_code: ""}};
     try {
       walletId = await getWalletId(eppn);
     } catch (e) {
@@ -48,7 +49,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     const host = req.headers.host;
     const protocol = req.headers["x-forwarded-proto"] || "http"; // HTTP or HTTPS
     const fqdn = `${protocol}://${host}`;
-    var response: BadgeStatusListResponse = { user_badgestatuslist: { lms_badge_count: 0, lms_badge_list: [], badge_detail_base_url: `${fqdn}/credential/detail`, error_code: ""}};
     const badgeIds = await getPortalWisdomBadgeIds();
     loggerDebug(`badgeIds: ${JSON.stringify(badgeIds)}`);
     if (badgeIds.length == 0) {
@@ -65,7 +65,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     let portalBadgeMap = new Map(portalBadges.map(obj => [obj.digital_badge_class_id, obj]));
 
     let errorCodes: string[] = [];
-    var lms_badge_list: IfUserBadgeStatus[] = [];
+    let lms_badge_list: IfUserBadgeStatus[] = [];
     for (const lms of lmsList) {
       if (!lms.ssoEnabled) {
         continue;
@@ -87,9 +87,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         loggerWarn(`${errorCodes.at(-1)}: $Failed to getCourseListFromMoodle. eppn: ${eppn} lmsUrl: ${lmsUrl}`);
         continue;
       }
-      var lmsBadgeMap = new Map<string, IfBadgeInfo>();
-      var badgeMetaDataMap = new Map<string, BadgeMetaData>();
-      var badgeList: IfBadgeInfo[];
+      let lmsBadgeMap = new Map<string, IfBadgeInfo>();
+      let badgeMetaDataMap = new Map<string, BadgeMetaData>();
+      let badgeList: IfBadgeInfo[];
       try {
         badgeList = await myBadgesList(eppn, "", lms);
       } catch (e) {
@@ -119,37 +119,39 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         const portalBadge = portalBadgeMap[badgeClassId];
         loggerDebug(`portalBadge.badges_id: ${portalBadge?.badges_id} lmsId: ${lms.lmsId}`);
-        var existBadge = lms_badge_list.find(o => o.badge_id == portalBadge?.badges_id && o.lms_id == lms.lmsId);
+        let existBadge = lms_badge_list.find(o => o.badge_id == portalBadge?.badges_id && o.lms_id == lms.lmsId);
         if (existBadge) {
           loggerWarn(`Duplicate portal badge: badgeId: ${portalBadge?.badges_id} lmsUrl: ${lmsUrl}`);
           continue;
         }
-        var courseId = "";
+        let courseId = "";
+        let alignmentsTargeturl = "";
         if (portalBadge) {
           try {
-            const alignments_targeturl = new URL(portalBadge.alignments_targeturl);
+            alignmentsTargeturl = portalBadge.alignments_targeturl;
+            const alignments_targeturl = new URL(alignmentsTargeturl);
             courseId = alignments_targeturl.searchParams.get("id");
           } catch (e) {
-            loggerWarn(`${errors.E20001}: Invalid url. alignments_targeturl: ${portalBadge.alignments_targeturl} lmsUrl: ${lmsUrl}`);
+            loggerWarn(`${errors.E20001}: Invalid url. alignments_targeturl: ${alignmentsTargeturl} lmsUrl: ${lmsUrl}`);
             errorCodes.push(errors.E20001);
           }
         }
         const course = courseList.find(o => o.id.toString() == courseId);
         if (course) {
-          loggerDebug(`alignments_targeturl: ${portalBadge?.alignments_targeturl} courseId: ${courseId} course: ${JSON.stringify(course)}`);
-          if (portalBadge?.alignments_targeturl.indexOf(lmsUrl) == -1 || portalBadge?.alignments_targeturl.indexOf(course.id.toString()) == -1) {
+          loggerDebug(`alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId} course: ${JSON.stringify(course)}`);
+          if (alignmentsTargeturl.indexOf(lmsUrl) == -1 || alignmentsTargeturl.indexOf(course.id.toString()) == -1) {
             loggerWarn(`${errors.E20001}: There is no badge information matching the course id[${course.id}] in the portal DB. lmsUrl: ${lmsUrl}`);
             errorCodes.push(errors.E20001);
           }
         } else {
-          loggerWarn(`${errors.E20001}: Not found course. alignments_targeturl: ${portalBadge?.alignments_targeturl} courseId: ${courseId}`);
+          loggerWarn(`${errors.E20001}: Not found course. alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
           errorCodes.push(errors.E20001);
         }
         loggerDebug(`badgeClassId: ${badgeClassId}`);
         const lmsId = lms.lmsId;
         const lmsBadge = lmsBadgeMap.get(badgeClassId);
         const badgeMetaData = badgeMetaDataMap.get(badgeClassId);
-        var submitted = false;
+        let submitted = false;
         const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
         loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
         if (vcBadge) {
