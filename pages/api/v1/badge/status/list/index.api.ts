@@ -121,8 +121,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           const alignments_targeturl = new URL(portalBadge.alignments_targeturl);
           courseId = alignments_targeturl.searchParams.get("id");
         } catch (e) {
-          loggerWarn(`Invalid url. alignments_targeturl: ${portalBadge.alignments_targeturl} lmsUrl: ${lmsUrl}`);
-          continue;
+          loggerWarn(`${errors.E20001}: Invalid url. alignments_targeturl: ${portalBadge.alignments_targeturl} lmsUrl: ${lmsUrl}`);
+          errorCodes.push(errors.E20001);
         }
         const course = courseList.find(o => o.id.toString() == courseId);
         if (course) {
@@ -138,8 +138,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         const badgeClassId = portalBadge.digital_badge_class_id;
         loggerDebug(`badgeClassId: ${badgeClassId}`);
         if (!lmsBadgeMap.has(badgeClassId)) {
-          loggerWarn(`${errors.E20002}: There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl} lmsBadgeMap.keys: ${[...lmsBadgeMap.keys()]}`);
-          errorCodes.push(errors.E20002);
+          loggerWarn(`There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl} lmsBadgeMap.keys: ${[...lmsBadgeMap.keys()]}`);
+          continue;
         }
         const lmsId = lms.lmsId;
         const lmsBadge = lmsBadgeMap.get(badgeClassId);
