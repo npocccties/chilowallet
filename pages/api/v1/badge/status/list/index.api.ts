@@ -63,6 +63,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       return res.status(200).json(response);
     }
     let portalBadgeMap = new Map(portalBadges.map(obj => [obj.digital_badge_class_id, obj]));
+    loggerDebug(`portalBadgeMap: ${JSON.stringify(Array.from(portalBadgeMap))}`);
 
     let errorCodes: string[] = [];
     let lms_badge_list: IfUserBadgeStatus[] = [];
