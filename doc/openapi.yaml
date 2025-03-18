@@ -405,7 +405,7 @@ components:
             properties:
               enrolled:
                 type: boolean
-                description: 受講フラグ (LMSコース一覧取得APIのリストにあり、LMSからバッジ取得できない状態) 
+                description: 受講フラグ (LMSからバッジ取得できバッジに該当するコースがLMSにある状態) 
               issued:
                 type: boolean
                 description: 発行フラグ (LMSからバッジ取得できるがウォレットのDBにない状態) 
