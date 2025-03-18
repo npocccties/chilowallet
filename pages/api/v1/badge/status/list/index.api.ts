@@ -119,11 +119,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         const portalBadge = portalBadgeMap[badgeClassId];
         loggerDebug(`portalBadge.badges_id: ${portalBadge?.badges_id} lmsId: ${lms.lmsId}`);
-        let existBadge = lms_badge_list.find(o => o.badge_id == portalBadge?.badges_id && o.lms_id == lms.lmsId);
-        if (existBadge) {
-          loggerWarn(`Duplicate portal badge: badgeId: ${portalBadge?.badges_id} lmsUrl: ${lmsUrl}`);
-          continue;
-        }
         let courseId = "";
         let alignmentsTargeturl = "";
         if (portalBadge) {
