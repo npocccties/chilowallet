@@ -405,16 +405,16 @@ components:
             properties:
               enrolled:
                 type: boolean
-                description: 受講フラグ (LMSからバッジ取得できバッジに該当するコースがLMSにある状態) 
+                description: 受講フラグ (コースがLMSにある状態) 
               issued:
                 type: boolean
-                description: 発行フラグ (LMSからバッジ取得できるがウォレットのDBにない状態) 
+                description: 発行フラグ (ウォレットのDBにバッジがない状態) 
               imported:
                 type: boolean
-                description: 受領フラグ (ウォレットのDBにある状態)
+                description: 受領フラグ (ウォレットのDBにバッジがある状態)
               submitted:
                 type: boolean
-                description: 提出フラグ (キャビネットに提出済みの状態)
+                description: 提出フラグ (キャビネットにバッジ提出済みの状態)
               enrolled_at:
                 type: string
                 format: date-time
