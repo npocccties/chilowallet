@@ -62,6 +62,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       response.user_badgestatuslist.error_code = errors.E30000;
       return res.status(200).json(response);
     }
+    let portalBadgeMap = new Map(portalBadges.map(obj => [obj.digital_badge_class_id, obj]));
+
     let errorCodes: string[] = [];
     var lms_badge_list: IfUserBadgeStatus[] = [];
     for (const lms of lmsList) {
@@ -109,20 +111,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           continue;
         }
       }
-      for (const portalBadge of portalBadges) {
-        loggerDebug(`portalBadge.badges_id: ${portalBadge.badges_id} lmsId: ${lms.lmsId}`);
-        var existBadge = lms_badge_list.find(o => o.badge_id == portalBadge.badges_id && o.lms_id == lms.lmsId);
+      for (const lmsBadgeEntry of lmsBadgeMap) {
+        const badgeClassId = lmsBadgeEntry[0];
+        if (portalBadgeMap.has(badgeClassId)) {
+          loggerWarn(`${errors.E20002}: There is no badge information matching the badge class id[${badgeClassId}] in the portal DB. lmsUrl: ${lmsUrl}`);
+          errorCodes.push(errors.E20002);
+        }
+        const portalBadge = portalBadgeMap[badgeClassId];
+        loggerDebug(`portalBadge.badges_id: ${portalBadge?.badges_id} lmsId: ${lms.lmsId}`);
+        var existBadge = lms_badge_list.find(o => o.badge_id == portalBadge?.badges_id && o.lms_id == lms.lmsId);
         if (existBadge) {
-          loggerWarn(`Duplicate portal badge: badgeId: ${portalBadge.badges_id} lmsUrl: ${lmsUrl}`);
+          loggerWarn(`Duplicate portal badge: badgeId: ${portalBadge?.badges_id} lmsUrl: ${lmsUrl}`);
           continue;
         }
         var courseId = "";
-        try {
-          const alignments_targeturl = new URL(portalBadge.alignments_targeturl);
-          courseId = alignments_targeturl.searchParams.get("id");
-        } catch (e) {
-          loggerWarn(`${errors.E20001}: Invalid url. alignments_targeturl: ${portalBadge.alignments_targeturl} lmsUrl: ${lmsUrl}`);
-          errorCodes.push(errors.E20001);
+        if (portalBadge) {
+          try {
+            const alignments_targeturl = new URL(portalBadge?.alignments_targeturl);
+            courseId = alignments_targeturl.searchParams.get("id");
+          } catch (e) {
+            loggerWarn(`${errors.E20001}: Invalid url. alignments_targeturl: ${portalBadge.alignments_targeturl} lmsUrl: ${lmsUrl}`);
+            errorCodes.push(errors.E20001);
+          }
         }
         const course = courseList.find(o => o.id.toString() == courseId);
         if (course) {
@@ -135,12 +145,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           loggerWarn(`${errors.E20001}: Not found course. alignments_targeturl: ${portalBadge.alignments_targeturl} courseId: ${courseId}`);
           errorCodes.push(errors.E20001);
         }
-        const badgeClassId = portalBadge.digital_badge_class_id;
         loggerDebug(`badgeClassId: ${badgeClassId}`);
-        if (!lmsBadgeMap.has(badgeClassId)) {
-          loggerWarn(`There is no badge matches the badge class id[${badgeClassId}] in the LMS. lmsUrl: ${lmsUrl} lmsBadgeMap.keys: ${[...lmsBadgeMap.keys()]}`);
-          continue;
-        }
         const lmsId = lms.lmsId;
         const lmsBadge = lmsBadgeMap.get(badgeClassId);
         const badgeMetaData = badgeMetaDataMap.get(badgeClassId);
