@@ -35,6 +35,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
 
   try {
     var walletId = 0;
+    const host = req.headers.host;
+    const protocol = req.headers["x-forwarded-proto"] || "http"; // HTTP or HTTPS
+    const fqdn = `${protocol}://${host}`;
     let response: BadgeStatusListResponse = { user_badgestatuslist: { lms_badge_count: 0, lms_badge_list: [], badge_detail_base_url: `${fqdn}/credential/detail`, error_code: ""}};
     try {
       walletId = await getWalletId(eppn);
@@ -46,9 +49,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     loggerDebug(`walletId: ${walletId}`);
     const lmsList = await findAllLmsList();
     loggerDebug(`lmsList: ${JSON.stringify(lmsList)}`);
-    const host = req.headers.host;
-    const protocol = req.headers["x-forwarded-proto"] || "http"; // HTTP or HTTPS
-    const fqdn = `${protocol}://${host}`;
     const badgeIds = await getPortalWisdomBadgeIds();
     loggerDebug(`badgeIds: ${JSON.stringify(badgeIds)}`);
     if (badgeIds.length == 0) {
