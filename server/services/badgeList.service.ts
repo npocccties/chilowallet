@@ -77,7 +77,7 @@ export const getVcBadge = async (
     }),
   ]);
   if (!badgeVcs) {
-    return null;
+    return undefined;
   }
   return badgeVcs;
 };
