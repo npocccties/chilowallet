@@ -127,7 +127,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         var courseId = "";
         if (portalBadge) {
           try {
-            const alignments_targeturl = new URL(portalBadge?.alignments_targeturl);
+            const alignments_targeturl = new URL(portalBadge.alignments_targeturl);
             courseId = alignments_targeturl.searchParams.get("id");
           } catch (e) {
             loggerWarn(`${errors.E20001}: Invalid url. alignments_targeturl: ${portalBadge.alignments_targeturl} lmsUrl: ${lmsUrl}`);
@@ -136,13 +136,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         const course = courseList.find(o => o.id.toString() == courseId);
         if (course) {
-          loggerDebug(`alignments_targeturl: ${portalBadge.alignments_targeturl} courseId: ${courseId} course: ${JSON.stringify(course)}`);
-          if (portalBadge.alignments_targeturl.indexOf(lmsUrl) == -1 || portalBadge.alignments_targeturl.indexOf(course.id.toString()) == -1) {
+          loggerDebug(`alignments_targeturl: ${portalBadge?.alignments_targeturl} courseId: ${courseId} course: ${JSON.stringify(course)}`);
+          if (portalBadge?.alignments_targeturl.indexOf(lmsUrl) == -1 || portalBadge?.alignments_targeturl.indexOf(course.id.toString()) == -1) {
             loggerWarn(`${errors.E20001}: There is no badge information matching the course id[${course.id}] in the portal DB. lmsUrl: ${lmsUrl}`);
             errorCodes.push(errors.E20001);
           }
         } else {
-          loggerWarn(`${errors.E20001}: Not found course. alignments_targeturl: ${portalBadge.alignments_targeturl} courseId: ${courseId}`);
+          loggerWarn(`${errors.E20001}: Not found course. alignments_targeturl: ${portalBadge?.alignments_targeturl} courseId: ${courseId}`);
           errorCodes.push(errors.E20001);
         }
         loggerDebug(`badgeClassId: ${badgeClassId}`);
