@@ -157,7 +157,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         response.user_badgestatuslist.lms_badge_count++;
         lms_badge_list.push({
-          enrolled: lmsBadge != undefined,
+          enrolled: course != undefined,
           issued: vcBadge == undefined,
           imported: vcBadge != undefined,
           submitted: submitted,
