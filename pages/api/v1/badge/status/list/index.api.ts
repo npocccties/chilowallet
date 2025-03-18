@@ -113,11 +113,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
       }
       for (const [badgeClassId, lmsBadge] of lmsBadgeMap.entries()) {
-        if (portalBadgeMap.has(badgeClassId)) {
+        if (!portalBadgeMap.has(badgeClassId)) {
           loggerWarn(`${errors.E20002}: There is no badge information matching the badge class id[${badgeClassId}] in the portal DB. lmsUrl: ${lmsUrl}`);
           errorCodes.push(errors.E20002);
         }
-        const portalBadge = portalBadgeMap[badgeClassId];
+        const portalBadge = portalBadgeMap.get(badgeClassId);
         loggerDebug(`portalBadge.badges_id: ${portalBadge?.badges_id} lmsId: ${lms.lmsId}`);
         let courseId = "";
         let alignmentsTargeturl = "";
