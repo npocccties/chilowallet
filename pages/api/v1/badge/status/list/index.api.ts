@@ -170,7 +170,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           issued_at: convertUNIXorISOstrToJST(lmsBadge?.dateissued),
           imported_at: convertUTCtoJSTstr(vcBadge?.createdAt),
           badge_expired_at: badgeMetaData?.expires?.toString() ?? null,
-          badge_id: portalBadge.badges_id,
+          badge_id: portalBadge?.badges_id,
           badge_vc_id: vcBadge?.badgeVcId ?? null,
           lms_id: lmsId,
           lms_name: lms.lmsName,
