@@ -111,8 +111,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           continue;
         }
       }
-      for (const lmsBadgeEntry of lmsBadgeMap) {
-        const badgeClassId = lmsBadgeEntry[0];
+      for (const [badgeClassId, lmsBadge] of lmsBadgeMap.entries()) {
         if (portalBadgeMap.has(badgeClassId)) {
           loggerWarn(`${errors.E20002}: There is no badge information matching the badge class id[${badgeClassId}] in the portal DB. lmsUrl: ${lmsUrl}`);
           errorCodes.push(errors.E20002);
@@ -144,7 +143,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         loggerDebug(`badgeClassId: ${badgeClassId}`);
         const lmsId = lms.lmsId;
-        const lmsBadge = lmsBadgeMap.get(badgeClassId);
         const badgeMetaData = badgeMetaDataMap.get(badgeClassId);
         let submitted = false;
         const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
