@@ -90,6 +90,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}, badgeMetaData: ${badgeMetaData?.toString() ?? null}`);
           badgeClassId = badgeMetaData.badge.id;
           badgeJson = await getBadgeJson(badgeClassId);
+          loggerDebug(`badgeJson.id: ${JSON.stringify(badgeJson)}`);
         } catch (e) {
           loggerWarn(`${errors.E20001}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
           errorCodes.push(errors.E20001);
@@ -105,6 +106,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           }
           const alignments_targeturl = new URL(alignmentsTargeturl);
           courseId = alignments_targeturl.searchParams.get("id");
+          loggerDebug(`alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
         } catch (e) {
           loggerWarn(`${errors.E20001}: Invalid url. alignments_targeturl: ${alignmentsTargeturl} lmsUrl: ${lmsUrl}`);
           errorCodes.push(errors.E20001);
@@ -153,7 +155,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           course_id: course?.id,
           course_name: course?.fullname,
           course_description: course?.summary,
-          badge_json: badgeJson?.toString() ?? null,
+          badge_json: JSON.stringify(badgeJson),
         });
       }
     }
