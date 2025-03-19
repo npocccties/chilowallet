@@ -149,7 +149,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           badge_vc_id: vcBadge?.badgeVcId ?? null,
           lms_id: lmsId,
           lms_name: lms.lmsName,
-          lms_url: lms.url,
+          lms_url: lms.lmsUrl,
           course_id: course?.id,
           course_name: course?.fullname,
           course_description: course?.summary,
