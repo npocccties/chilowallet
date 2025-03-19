@@ -11,7 +11,6 @@ import { findAllLmsList } from "@/server/repository/lmsList";
 import { getVcBadge } from "@/server/services/badgeList.service";
 import { getCourseListFromMoodle } from "@/server/services/courseList.service";
 import { getBadgeJson, myBadgesList, myOpenBadge } from "@/server/services/lmsAccess.service";
-import { getPortalWisdomBadgeIds, getPortalWisdomBadges } from "@/server/services/portal.service";
 import { getWalletId } from "@/server/services/wallet.service";
 import { api } from "@/share/api";
 import { BadgeStatusListResponse } from "@/types/api/badge";
