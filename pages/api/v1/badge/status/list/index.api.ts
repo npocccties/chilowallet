@@ -10,7 +10,7 @@ import { credentialDetail } from "@/server/repository/credentialDetail";
 import { findAllLmsList } from "@/server/repository/lmsList";
 import { getVcBadge } from "@/server/services/badgeList.service";
 import { getCourseListFromMoodle } from "@/server/services/courseList.service";
-import { myBadgesList, myOpenBadge } from "@/server/services/lmsAccess.service";
+import { getBadgeJson, myBadgesList, myOpenBadge } from "@/server/services/lmsAccess.service";
 import { getPortalWisdomBadgeIds, getPortalWisdomBadges } from "@/server/services/portal.service";
 import { getWalletId } from "@/server/services/wallet.service";
 import { api } from "@/share/api";
@@ -49,21 +49,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     loggerDebug(`walletId: ${walletId}`);
     const lmsList = await findAllLmsList();
     loggerDebug(`lmsList: ${JSON.stringify(lmsList)}`);
-    const badgeIds = await getPortalWisdomBadgeIds();
-    loggerDebug(`badgeIds: ${JSON.stringify(badgeIds)}`);
-    if (badgeIds.length == 0) {
-      loggerError(`${errors.E30000}: badgesIds is empty.`);
-      response.user_badgestatuslist.error_code = errors.E30000;
-      return res.status(200).json(response);
-    }
-    const portalBadges = await getPortalWisdomBadges(badgeIds);
-    if (portalBadges.length == 0) {
-      loggerError(`${errors.E30000}: portalWidomBadges is empty.`);
-      response.user_badgestatuslist.error_code = errors.E30000;
-      return res.status(200).json(response);
-    }
-    let portalBadgeMap = new Map(portalBadges.map(obj => [obj.digital_badge_class_id, obj]));
-    loggerDebug(`portalBadgeMap: ${JSON.stringify(Array.from(portalBadgeMap))}`);
 
     let errorCodes: string[] = [];
     let lms_badge_list: IfUserBadgeStatus[] = [];
@@ -88,8 +73,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         loggerWarn(`${errorCodes.at(-1)}: $Failed to getCourseListFromMoodle. eppn: ${eppn} lmsUrl: ${lmsUrl}`);
         continue;
       }
-      let lmsBadgeMap = new Map<string, IfBadgeInfo>();
-      let badgeMetaDataMap = new Map<string, BadgeMetaData>();
       let badgeList: IfBadgeInfo[];
       try {
         badgeList = await myBadgesList(eppn, "", lms);
@@ -100,36 +83,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       }
       for (const badge of badgeList) {
         const uniquehash = badge.uniquehash;
+        let badgeClassId = "";
+        let badgeMetaData: BadgeMetaData = undefined;
+        let badgeJson: any = undefined;
         try {
-          const badgeMetaData = await myOpenBadge(uniquehash, lmsUrl);
-          loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}`);
-          const badgeClassId = badgeMetaData.badge.id;
-          lmsBadgeMap.set(badgeClassId, badge);
-          badgeMetaDataMap.set(badgeClassId, badgeMetaData);
+          badgeMetaData = await myOpenBadge(uniquehash, lmsUrl);
+          loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}, badgeMetaData: ${badgeMetaData?.toString() ?? null}`);
+          badgeClassId = badgeMetaData.badge.id;
+          badgeJson = await getBadgeJson(badgeClassId);
         } catch (e) {
           loggerWarn(`${errors.E20001}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
           errorCodes.push(errors.E20001);
-          continue;
         }
-      }
-      for (const [badgeClassId, lmsBadge] of lmsBadgeMap.entries()) {
-        if (!portalBadgeMap.has(badgeClassId)) {
-          loggerWarn(`${errors.E20002}: There is no badge information matching the badge class id[${badgeClassId}] in the portal DB. lmsUrl: ${lmsUrl}`);
-          errorCodes.push(errors.E20002);
-        }
-        const portalBadge = portalBadgeMap.get(badgeClassId);
-        loggerDebug(`portalBadge.badges_id: ${portalBadge?.badges_id} lmsId: ${lms.lmsId}`);
         let courseId = "";
         let alignmentsTargeturl = "";
-        if (portalBadge) {
-          try {
-            alignmentsTargeturl = portalBadge.alignments_targeturl;
-            const alignments_targeturl = new URL(alignmentsTargeturl);
-            courseId = alignments_targeturl.searchParams.get("id");
-          } catch (e) {
-            loggerWarn(`${errors.E20001}: Invalid url. alignments_targeturl: ${alignmentsTargeturl} lmsUrl: ${lmsUrl}`);
-            errorCodes.push(errors.E20001);
+        try {
+          for (const url of badgeJson.alignments as string[]) {
+            if (url.indexOf('course/view.php') != -1) {
+              alignmentsTargeturl = url;
+              break;
+            }
           }
+          const alignments_targeturl = new URL(alignmentsTargeturl);
+          courseId = alignments_targeturl.searchParams.get("id");
+        } catch (e) {
+          loggerWarn(`${errors.E20001}: Invalid url. alignments_targeturl: ${alignmentsTargeturl} lmsUrl: ${lmsUrl}`);
+          errorCodes.push(errors.E20001);
         }
         const course = courseList.find(o => o.id.toString() == courseId);
         if (course) {
@@ -144,7 +123,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         }
         loggerDebug(`badgeClassId: ${badgeClassId}`);
         const lmsId = lms.lmsId;
-        const badgeMetaData = badgeMetaDataMap.get(badgeClassId);
         let submitted = false;
         const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
         loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
@@ -154,20 +132,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
             submitted = submittedBadge.submissions != null;
           }
         }
+        let issued = badgeJson != undefined;
+        let issued_at = undefined;
+        if (issued) {
+          issued_at = convertUNIXorISOstrToJST(badge.dateissued)
+        }
         response.user_badgestatuslist.lms_badge_count++;
         lms_badge_list.push({
-          enrolled: course != undefined,
-          issued: vcBadge == undefined,
+          enrolled: course != undefined,//コース有無
+          issued: issued,//バッジ有無
           imported: vcBadge != undefined,
           submitted: submitted,
           enrolled_at: convertUNIXorISOstrToJST(course?.startdate),
-          issued_at: convertUNIXorISOstrToJST(lmsBadge?.dateissued),
+          issued_at: issued_at,//issuedにひきずられる
           imported_at: convertUTCtoJSTstr(vcBadge?.createdAt),
           badge_expired_at: badgeMetaData?.expires?.toString() ?? null,
-          badge_id: portalBadge?.badges_id,
           badge_vc_id: vcBadge?.badgeVcId ?? null,
           lms_id: lmsId,
           lms_name: lms.lmsName,
+          lms_url: lms.url,
+          course_id: course?.id,
+          course_name: course?.fullname,
+          course_description: course?.summary,
+          badge_json: badgeJson?.toString() ?? null,
         });
       }
     }

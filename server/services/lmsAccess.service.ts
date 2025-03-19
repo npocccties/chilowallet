@@ -198,3 +198,16 @@ export const myOpenBadge = async (uniquehash: string, lmsUrl: string): Promise<B
     throw err;
   }
 };
+
+export const getBadgeJson = async (url: string): Promise<any> => {
+  try {
+    const openBadgeMeta = await retryRequest(() => {
+      return axios.get(url).then((res) => res.data);
+    }, moodleRetryConfig);
+
+    return openBadgeMeta;
+  } catch (err) {
+    loggerError(`${logStatus.error} server/services/lmsAccess.service badgeJson`);
+    throw err;
+  }
+};

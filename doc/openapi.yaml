@@ -431,10 +431,6 @@ components:
                 type: string
                 format: date-time
                 description: バッジ有効期限
-              badge_id:
-                type: integer
-                format: int64
-                description: '能力バッジID（ポータルDB）'
               badge_vc_id:
                 type: integer
                 description: 'バッジVCID（能力バッジの詳細ページのパスに指定する番号）'
@@ -444,11 +440,26 @@ components:
               lms_name:
                 type: string
                 description: 'LMSの名前'
+              lms_url:
+                type: string
+                description: 'LMSのURL'
+              course_id:
+                type: integer
+                description: 'コースのID'
+              course_name:
+                type: string
+                description: 'コースの名前'
+              course_description:
+                type: string
+                description: 'コースの説明'
+              badge_json:
+                type: string
+                description: 'バッジクラスIDのURLのレスポンスのJSON'
             required:
               - enrolled
               - issued
               - imported
-              - badge_id
+              - submitted
               - lms_id
               - lms_name
         badge_detail_base_url:

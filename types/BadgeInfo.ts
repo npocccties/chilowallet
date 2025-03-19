@@ -114,10 +114,14 @@ export interface IfUserBadgeStatus {
   issued_at: string;
   imported_at: string;
   badge_expired_at: string;
-  badge_id: number;
   badge_vc_id: number;
   lms_id: number;
   lms_name: string;
+  lms_url: string;
+  course_id: number;
+  course_name: string;
+  course_description: string;
+  badge_json: string;
 }
 
 export type UserBadgeStatus = IfUserBadgeStatus;
