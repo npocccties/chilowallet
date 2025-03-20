@@ -41,12 +41,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     try {
       walletId = await getWalletId(eppn);
     } catch (e) {
-      loggerError(`${errors.E20003}: Not found wallet. eppn: ${eppn}`);
-      response.user_badgestatuslist.error_code = errors.E20003;
+      loggerError(`${errors.E20001}: Not found wallet. eppn: ${eppn}`);
+      response.user_badgestatuslist.error_code = errors.E20001;
       return res.status(200).json(response);
     }
     loggerDebug(`walletId: ${walletId}`);
     const lmsList = await findAllLmsList();
+    if (lmsList.length == 0) {
+      loggerError(`${errors.E20000}: Not found lms list.`);
+      response.user_badgestatuslist.error_code = errors.E20000;
+      return res.status(200).json(response);
+    }
     loggerDebug(`lmsList: ${JSON.stringify(lmsList)}`);
 
     let errorCodes: string[] = [];
@@ -89,11 +94,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           badgeMetaData = await myOpenBadge(uniquehash, lmsUrl);
           loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}, badgeMetaData: ${badgeMetaData?.toString() ?? null}`);
           badgeClassId = badgeMetaData.badge.id;
+        } catch (e) {
+          loggerWarn(`${errors.E10003}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
+          errorCodes.push(errors.E10003);
+        }
+        try {
           badgeJson = await getBadgeJson(badgeClassId);
           loggerDebug(`badgeJson: ${JSON.stringify(badgeJson)}`);
         } catch (e) {
-          loggerWarn(`${errors.E20001}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
-          errorCodes.push(errors.E20001);
+          loggerWarn(`${errors.E10004}: Failed to retrieve badge json from the LMS. badgeClassId: ${badgeClassId} lmsUrl: ${lmsUrl}`);
+          errorCodes.push(errors.E10004);
         }
         let courseId = "";
         let alignmentsTargeturl = "";
@@ -108,19 +118,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
             }
           }
         } catch (e) {
-          loggerWarn(`${errors.E20001}: Invalid url. alignments_targeturl: ${alignmentsTargeturl} lmsUrl: ${lmsUrl}`);
-          errorCodes.push(errors.E20001);
+          loggerWarn(`${errors.E10005}: Invalid url. alignments_targeturl: ${alignmentsTargeturl} lmsUrl: ${lmsUrl}`);
+          errorCodes.push(errors.E10005);
         }
         const course = courseList.find(o => o.id.toString() == courseId);
-        if (course) {
-          loggerDebug(`alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId} course: ${JSON.stringify(course)}`);
-          if (alignmentsTargeturl.indexOf(lmsUrl) == -1 || alignmentsTargeturl.indexOf(course.id.toString()) == -1) {
-            loggerWarn(`${errors.E20001}: There is no badge information matching the course id[${course.id}] in the portal DB. lmsUrl: ${lmsUrl}`);
-            errorCodes.push(errors.E20001);
-          }
-        } else {
-          loggerWarn(`${errors.E20001}: Not found course. alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
-          errorCodes.push(errors.E20001);
+        if (!course) {
+          loggerWarn(`${errors.E10006}: Not found course. alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
+          errorCodes.push(errors.E10006);
         }
         loggerDebug(`badgeClassId: ${badgeClassId}`);
         const lmsId = lms.lmsId;
