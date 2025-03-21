@@ -135,7 +135,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         if (vcBadge) {
           const submittedBadge = await credentialDetail({ badgeVcId: vcBadge.badgeVcId, walletId: walletId });
           if (submittedBadge) {
-            submitted = submittedBadge.submissions != null;
+            submitted = submittedBadge.submissions != undefined;
           }
         }
         let issued = badgeJson != undefined;
