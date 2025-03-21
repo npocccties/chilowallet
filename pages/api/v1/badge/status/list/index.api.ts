@@ -85,6 +85,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         errorCodes.push(errors.E10002);
         continue;
       }
+      // ユーザに紐づいたバッジをもとに情報の収集
       for (const badge of badgeList) {
         const uniquehash = badge.uniquehash;
         let badgeClassId = "";
@@ -161,6 +162,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           course_description: course?.summary,
           badge_json: JSON.stringify(badgeJson),
         });
+      }
+      // バッジと紐づかないコースがないかコースリストをもとにチェック
+      for (const course of courseList) {
+        const badge = lms_badge_list.find(o => o?.course_id == course.id);
+        if (!badge) {
+          lms_badge_list.push({
+            enrolled: true,//コース主体なのでtrue
+            issued: false,//バッジと紐づいてないのでfalse
+            imported: false,
+            submitted: false,
+            enrolled_at: convertUNIXorISOstrToJST(course?.startdate),
+            issued_at: null,//issuedにひきずられる
+            imported_at: null,
+            badge_expired_at: null,
+            badge_vc_id: null,
+            lms_id: lmsId,
+            lms_name: lms.lmsName,
+            lms_url: lms.lmsUrl,
+            course_id: course?.id,
+            course_name: course?.fullname,
+            course_description: course?.summary,
+            badge_json: null,
+          });
+        }
       }
     }
     if (errorCodes.length != 0) {
