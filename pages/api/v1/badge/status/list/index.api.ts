@@ -1,4 +1,3 @@
-
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { errors } from "@/constants/error";
@@ -8,7 +7,7 @@ import { loggerDebug, loggerError, loggerInfo, loggerWarn } from "@/lib/logger";
 import { getUserInfoFormJwt } from "@/lib/userInfo";
 import { credentialDetail } from "@/server/repository/credentialDetail";
 import { findAllLmsList } from "@/server/repository/lmsList";
-import { getVcBadge } from "@/server/services/badgeList.service";
+import { getVcBadge, getVcBadges } from "@/server/services/badgeList.service";
 import { getCourseListFromMoodle } from "@/server/services/courseList.service";
 import { getBadgeJson, myBadgesList, myOpenBadge } from "@/server/services/lmsAccess.service";
 import { getWalletId } from "@/server/services/wallet.service";
@@ -19,7 +18,6 @@ import { IfBadgeInfo, IfCourseInfo, IfUserBadgeStatus } from "@/types/BadgeInfo"
 import { BadgeMetaData } from "@/types/badgeInfo/metaData";
 
 const apiPath = api.v1.badge.status_list;
-
 
 async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusListResponse | ErrorResponse>) {
   loggerInfo(logStartForApi(apiPath));
@@ -86,87 +84,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         continue;
       }
       // ユーザに紐づいたバッジをもとに情報の収集
+      loggerDebug(`1 ... Collecting information based on the badges associated with the user.`);
       for (const badge of badgeList) {
         const uniquehash = badge.uniquehash;
-        let badgeClassId = "";
-        let badgeMetaData: BadgeMetaData = undefined;
-        let badgeJson: any = undefined;
-        try {
-          badgeMetaData = await myOpenBadge(uniquehash, lmsUrl);
-          loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}, badgeMetaData: ${badgeMetaData?.toString() ?? null}`);
-          badgeClassId = badgeMetaData.badge.id;
-        } catch (e) {
-          loggerWarn(`${errors.E10003}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
-          errorCodes.push(errors.E10003);
-        }
-        try {
-          badgeJson = await getBadgeJson(badgeClassId);
-          loggerDebug(`badgeJson: ${JSON.stringify(badgeJson)}`);
-        } catch (e) {
-          loggerWarn(`${errors.E10004}: Failed to retrieve badge json from the LMS. badgeClassId: ${badgeClassId} lmsUrl: ${lmsUrl}`);
-          errorCodes.push(errors.E10004);
-        }
-        let courseId = "";
-        let alignmentsTargeturl = "";
-        try {
-          for (const alignment of badgeJson.alignments) {
-            if (alignment.targetUrl.indexOf('course/view.php') != -1) {
-              alignmentsTargeturl = alignment.targetUrl;
-              const alignments_targeturl = new URL(alignmentsTargeturl);
-              courseId = alignments_targeturl.searchParams.get("id");
-              loggerDebug(`alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
-              break;
-            }
-          }
-        } catch (e) {
-          loggerWarn(`${errors.E10005}: Invalid url. alignments_targeturl: ${alignmentsTargeturl} lmsUrl: ${lmsUrl}`);
-          errorCodes.push(errors.E10005);
-        }
-        const course = courseList.find(o => o.id.toString() == courseId);
-        if (!course) {
-          loggerWarn(`${errors.E10006}: Not found course. alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
-          errorCodes.push(errors.E10006);
-        }
-        loggerDebug(`badgeClassId: ${badgeClassId}`);
-        const lmsId = lms.lmsId;
-        let submitted = false;
-        const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
-        loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
-        if (vcBadge) {
-          const submittedBadge = await credentialDetail({ badgeVcId: vcBadge.badgeVcId, walletId: walletId });
-          if (submittedBadge) {
-            submitted = submittedBadge.submissions != undefined;
-          }
-        }
-        let issued = badgeJson != undefined;
-        let issued_at = undefined;
-        if (issued) {
-          issued_at = convertUNIXorISOstrToJST(badge.dateissued)
-        }
-        response.user_badgestatuslist.lms_badge_count++;
-        lms_badge_list.push({
-          enrolled: course != undefined,//コース有無
-          issued: issued,//バッジ有無
-          imported: vcBadge != undefined,
-          submitted: submitted,
-          enrolled_at: convertUNIXorISOstrToJST(course?.startdate),
-          issued_at: issued_at,//issuedにひきずられる
-          imported_at: convertUTCtoJSTstr(vcBadge?.createdAt),
-          badge_expired_at: badgeMetaData?.expires?.toString() ?? null,
-          badge_vc_id: vcBadge?.badgeVcId ?? null,
-          lms_id: lmsId,
-          lms_name: lms.lmsName,
-          lms_url: lms.lmsUrl,
-          course_id: course?.id,
-          course_name: course?.fullname,
-          course_description: course?.summary,
-          badge_json: JSON.stringify(badgeJson),
-        });
+        collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
+           response, lms_badge_list, badge.dateissued);
       }
       // バッジと紐づかないコースがないかコースリストをもとにチェック
+      loggerDebug(`2 ... Collecting courses that are not associated with any badges.`);
       for (const course of courseList) {
         const badge = lms_badge_list.find(o => o?.course_id == course.id);
         if (!badge) {
+          loggerDebug(`2-1 ... Not found course[${course.id}].`);
           lms_badge_list.push({
             enrolled: true,//コース主体なのでtrue
             issued: false,//バッジと紐づいてないのでfalse
@@ -187,6 +116,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           });
         }
       }
+      // ウォレットにしか取り込んでないバッジがないかチェック
+      loggerDebug(`3 ... Collecting badges that exist only in the wallet.`);
+      const vcBadges = await getVcBadges(walletId, lmsId);
+      for (const vcBadge of vcBadges) {
+        const badge = lms_badge_list.find(o => o?.badge_vc_id == vcBadge.badgeVcId);
+        if (!badge) {
+          loggerDebug(`3-1 ... Not found vcBadge[${vcBadge.badgeVcId}].`);
+          const uniquehash = vcBadge.badgeUniquehash;
+          collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
+             response, lms_badge_list, vcBadge.badgeIssuedon?.getTime() ?? undefined);
+        }
+      }
     }
     if (errorCodes.length != 0) {
       response.user_badgestatuslist.error_code = errorCodes.at(0);
@@ -204,5 +145,84 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     loggerInfo(logEndForApi(apiPath));
   }
 }
+
+async function collectBadgesBy(
+  walletId: number, uniquehash: string, lmsId: number, lmsName: string, lmsUrl: string, errorCodes: string[], courseList: IfCourseInfo[],
+  response: BadgeStatusListResponse, lms_badge_list: IfUserBadgeStatus[], dateissued?: number) {
+  let badgeClassId = "";
+  let badgeMetaData: BadgeMetaData = undefined;
+  let badgeJson: any = undefined;
+  try {
+    badgeMetaData = await myOpenBadge(uniquehash, lmsUrl);
+    loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}, badgeMetaData: ${badgeMetaData?.toString() ?? null}`);
+    badgeClassId = badgeMetaData.badge.id;
+  } catch (e) {
+    loggerWarn(`${errors.E10003}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
+    errorCodes.push(errors.E10003);
+  }
+  try {
+    badgeJson = await getBadgeJson(badgeClassId);
+    loggerDebug(`badgeJson: ${JSON.stringify(badgeJson)}`);
+  } catch (e) {
+    loggerWarn(`${errors.E10004}: Failed to retrieve badge json from the LMS. badgeClassId: ${badgeClassId} lmsUrl: ${lmsUrl}`);
+    errorCodes.push(errors.E10004);
+  }
+  let courseId = "";
+  let alignmentsTargeturl = "";
+  try {
+    for (const alignment of badgeJson.alignments) {
+      if (alignment.targetUrl.indexOf('course/view.php') != -1) {
+        alignmentsTargeturl = alignment.targetUrl;
+        const alignments_targeturl = new URL(alignmentsTargeturl);
+        courseId = alignments_targeturl.searchParams.get("id");
+        loggerDebug(`alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
+        break;
+      }
+    }
+  } catch (e) {
+    loggerWarn(`${errors.E10005}: Invalid url. alignments_targeturl: ${alignmentsTargeturl} lmsUrl: ${lmsUrl}`);
+    errorCodes.push(errors.E10005);
+  }
+  const course = courseList.find(o => o.id.toString() == courseId);
+  if (!course) {
+    loggerWarn(`${errors.E10006}: Not found course. alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
+    errorCodes.push(errors.E10006);
+  }
+  loggerDebug(`badgeClassId: ${badgeClassId}`);
+  let submitted = false;
+  const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
+  loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
+  if (vcBadge) {
+    const submittedBadge = await credentialDetail({ badgeVcId: vcBadge.badgeVcId, walletId: walletId });
+    if (submittedBadge) {
+      submitted = submittedBadge.submissions != undefined;
+    }
+  }
+  let issued = badgeJson != undefined;
+  let issued_at = undefined;
+  if (issued) {
+    issued_at = convertUNIXorISOstrToJST(dateissued)
+  }
+  response.user_badgestatuslist.lms_badge_count++;
+  lms_badge_list.push({
+    enrolled: course != undefined,//コース有無
+    issued: issued,//バッジ有無
+    imported: vcBadge != undefined,
+    submitted: submitted,
+    enrolled_at: convertUNIXorISOstrToJST(course?.startdate),
+    issued_at: issued_at,//issuedにひきずられる
+    imported_at: convertUTCtoJSTstr(vcBadge?.createdAt),
+    badge_expired_at: badgeMetaData?.expires?.toString() ?? null,
+    badge_vc_id: vcBadge?.badgeVcId ?? null,
+    lms_id: lmsId,
+    lms_name: lmsName,
+    lms_url: lmsUrl,
+    course_id: course?.id,
+    course_name: course?.fullname,
+    course_description: course?.summary,
+    badge_json: JSON.stringify(badgeJson),
+  });
+
+} 
 
 export default handler;

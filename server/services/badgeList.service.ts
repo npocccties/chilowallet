@@ -81,3 +81,29 @@ export const getVcBadge = async (
   }
   return badgeVcs;
 };
+
+export const getVcBadges = async (
+  walletId: number,
+  lmsId: number,
+) => {
+  const [badgeVcs] = await Promise.all([
+    prisma.badgeVc.findMany({
+      select: {
+        badgeVcId: true,
+        badgeExpires: true,
+        createdAt: true,
+        badgeClassId: true,
+        badgeIssuedon: true,
+        badgeUniquehash: true,
+      },
+      where: {
+        walletId: walletId,
+        lmsId: lmsId,
+      },
+    }),
+  ]);
+  if (!badgeVcs) {
+    return undefined;
+  }
+  return badgeVcs;
+};
