@@ -56,6 +56,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     let lms_badge_list: IfUserBadgeStatus[] = [];
     let badgeClassIds = new Set<string>();
     let vadgeVcIds = new Set<number>();
+    let courseIds = new Set<number>();
     for (const lms of lmsList) {
       if (!lms.ssoEnabled) {
         continue;
@@ -90,13 +91,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       for (const badge of badgeList) {
         const uniquehash = badge.uniquehash;
         collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-           response, lms_badge_list, badgeClassIds, vadgeVcIds, badge.dateissued);
+           response, lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, badge.dateissued);
       }
       // バッジと紐づかないコースがないかコースリストをもとにチェック
       loggerDebug(`2 ... Collecting courses that are not associated with any badges. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
       for (const course of courseList) {
-        const badge = lms_badge_list.find(o => o?.course_id == course.id);
-        if (!badge) {
+        if (!courseIds.has(course.id)) {
           loggerDebug(`2-1 ... Not found course[${course.id}].`);
           lms_badge_list.push({
             enrolled: true,//コース主体なのでtrue
@@ -127,7 +127,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           loggerDebug(`3-1 ... Not found vcBadge[${vcBadge.badgeVcId}].`);
           const uniquehash = vcBadge.badgeUniquehash;
           collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-             response, lms_badge_list, badgeClassIds, vadgeVcIds, vcBadge.badgeIssuedon?.getTime() ?? undefined);
+             response, lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeIssuedon?.getTime() ?? undefined);
         }
       }
     }
@@ -150,7 +150,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
 
 async function collectBadgesBy(
   walletId: number, uniquehash: string, lmsId: number, lmsName: string, lmsUrl: string, errorCodes: string[], courseList: IfCourseInfo[],
-  response: BadgeStatusListResponse, lms_badge_list: IfUserBadgeStatus[], badgeClassIds: Set<string>, vadgeVcIds: Set<number>, dateissued?: number) {
+  response: BadgeStatusListResponse, lms_badge_list: IfUserBadgeStatus[], badgeClassIds: Set<string>, vadgeVcIds: Set<number>, courseIds: Set<number>, dateissued?: number) {
   let badgeClassId = "";
   let badgeMetaData: BadgeMetaData = undefined;
   let badgeJson: any = undefined;
@@ -173,14 +173,14 @@ async function collectBadgesBy(
     loggerWarn(`${errors.E10004}: Failed to retrieve badge json from the LMS. badgeClassId: ${badgeClassId} lmsUrl: ${lmsUrl}`);
     errorCodes.push(errors.E10004);
   }
-  let courseId = "";
+  let courseId: number = 0;
   let alignmentsTargeturl = "";
   try {
     for (const alignment of badgeJson.alignments) {
       if (alignment.targetUrl.indexOf('course/view.php') != -1) {
         alignmentsTargeturl = alignment.targetUrl;
         const alignments_targeturl = new URL(alignmentsTargeturl);
-        courseId = alignments_targeturl.searchParams.get("id");
+        courseId = Number(alignments_targeturl.searchParams.get("id"));
         loggerDebug(`alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
         break;
       }
@@ -189,11 +189,16 @@ async function collectBadgesBy(
     loggerWarn(`${errors.E10005}: Invalid url. alignments_targeturl: ${alignmentsTargeturl} lmsUrl: ${lmsUrl}`);
     errorCodes.push(errors.E10005);
   }
-  const course = courseList.find(o => o.id.toString() == courseId);
+  const course = courseList.find(o => o.id == courseId);
   if (!course) {
     loggerWarn(`${errors.E10006}: Not found course. alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
     errorCodes.push(errors.E10006);
   }
+  if (courseIds.has(courseId)) {
+    loggerWarn(`Duplicate course id. courseId: ${courseId} lmsUrl: ${lmsUrl}`);
+    return;
+  }
+  courseIds.add(courseId);
   loggerDebug(`badgeClassId: ${badgeClassId}`);
   let submitted = false;
   const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
