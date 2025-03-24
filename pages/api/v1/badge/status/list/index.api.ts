@@ -129,6 +129,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
             course_description: course?.summary,
             badge_json: null,
           });
+          courseIds.add(course?.id);
         }
       }
       loggerDebug(`[lmsId: ${lmsId}] 4 ... badgeClassIds: ${JSON.stringify([...badgeClassIds])} vadgeVcIds: ${JSON.stringify([...vadgeVcIds])} courseIds: ${JSON.stringify([...courseIds])}`);
