@@ -73,7 +73,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         } else {
           errorCodes.push(errors.E29999);
         }
-        loggerWarn(`${errorCodes.at(-1)}: $Failed to getCourseListFromMoodle. eppn: ${eppn} lmsUrl: ${lmsUrl}`);
+        loggerWarn(`${errorCodes[errorCodes.length - 1]}: $Failed to getCourseListFromMoodle. eppn: ${eppn} lmsUrl: ${lmsUrl}`);
         continue;
       }
       let badgeList: IfBadgeInfo[];
@@ -227,7 +227,7 @@ async function collectBadgesBy(
     course_description: course?.summary,
     badge_json: JSON.stringify(badgeJson),
   });
-  lmsBadgeMap[badgeClassId] = lms_badge_list.at(-1);
+  lmsBadgeMap[badgeClassId] = lms_badge_list[lms_badge_list.length - 1];
 
 } 
 
