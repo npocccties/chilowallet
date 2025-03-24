@@ -198,20 +198,20 @@ async function collectBadgesBy(
     loggerWarn(`${errors.E10006}: Not found course. alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
     errorCodes.push(errors.E10006);
   }
-  // if (courseIds.has(courseId)) {
-  //   loggerWarn(`Duplicate course id. courseId: ${courseId} lmsUrl: ${lmsUrl}`);
-  //   return;
-  // }
+  if (courseIds.has(courseId)) {
+    loggerWarn(`Duplicate course id. courseId: ${courseId} lmsUrl: ${lmsUrl}`);
+    return;
+  }
   courseIds.add(courseId);
   loggerDebug(`badgeClassId: ${badgeClassId}`);
   let submitted = false;
   const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
   loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
   if (vcBadge) {
-    if (vadgeVcIds.has(vcBadge.badgeVcId)) {
-      loggerWarn(`Duplicate badge vc id. badgeVcId: ${vcBadge.badgeVcId} lmsUrl: ${lmsUrl}`);
-      return;
-    }
+    // if (vadgeVcIds.has(vcBadge.badgeVcId)) {
+    //   loggerWarn(`Duplicate badge vc id. badgeVcId: ${vcBadge.badgeVcId} lmsUrl: ${lmsUrl}`);
+    //   return;
+    // }
     const submittedBadge = await credentialDetail({ badgeVcId: vcBadge.badgeVcId, walletId: walletId });
     if (submittedBadge) {
       submitted = submittedBadge.submissions != undefined;
