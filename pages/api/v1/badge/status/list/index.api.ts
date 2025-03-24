@@ -93,11 +93,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
            response, lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, badge.dateissued);
       }
+      // ウォレットにしか取り込んでないバッジがないかチェック
+      loggerDebug(`2 ... Collecting badges that exist only in the wallet. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
+      const vcBadges = await getVcBadges(walletId, lmsId);
+      for (const vcBadge of vcBadges) {
+        if (!vadgeVcIds.has(vcBadge.badgeVcId)) {
+          loggerDebug(`2-1 ... Not found vcBadge[${vcBadge.badgeVcId}].`);
+          const uniquehash = vcBadge.badgeUniquehash;
+          collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
+             response, lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeIssuedon?.getTime() ?? undefined);
+        }
+      }
       // バッジと紐づかないコースがないかコースリストをもとにチェック
-      loggerDebug(`2 ... Collecting courses that are not associated with any badges. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
+      loggerDebug(`3 ... Collecting courses that are not associated with any badges. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
       for (const course of courseList) {
         if (!courseIds.has(course.id)) {
-          loggerDebug(`2-1 ... Not found course[${course.id}].`);
+          loggerDebug(`3-1 ... Not found course[${course.id}].`);
           lms_badge_list.push({
             enrolled: true,//コース主体なのでtrue
             issued: false,//バッジと紐づいてないのでfalse
@@ -116,18 +127,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
             course_description: course?.summary,
             badge_json: null,
           });
-        }
-      }
-      // ウォレットにしか取り込んでないバッジがないかチェック
-      loggerDebug(`3 ... Collecting badges that exist only in the wallet. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
-      const vcBadges = await getVcBadges(walletId, lmsId);
-      for (const vcBadge of vcBadges) {
-        const badge = lms_badge_list.find(o => o?.badge_vc_id == vcBadge.badgeVcId);
-        if (!badge) {
-          loggerDebug(`3-1 ... Not found vcBadge[${vcBadge.badgeVcId}].`);
-          const uniquehash = vcBadge.badgeUniquehash;
-          collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-             response, lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeIssuedon?.getTime() ?? undefined);
         }
       }
     }
