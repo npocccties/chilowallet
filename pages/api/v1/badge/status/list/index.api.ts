@@ -213,7 +213,6 @@ async function collectBadgesBy(
   if (issued) {
     issued_at = convertUNIXorISOstrToJST(dateissued)
   }
-  response.user_badgestatuslist.lms_badge_count++;
   lms_badge_list.push({
     enrolled: course != undefined,//コース有無
     issued: issued,//バッジ有無
@@ -232,6 +231,7 @@ async function collectBadgesBy(
     course_description: course?.summary,
     badge_json: JSON.stringify(badgeJson),
   });
+  response.user_badgestatuslist.lms_badge_count = lms_badge_list.length;
   badgeClassIds.add(badgeClassId);
   if (vcBadge?.badgeVcId) {
     vadgeVcIds.add(vcBadge?.badgeVcId);
