@@ -95,6 +95,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       }
       // ウォレットにしか取り込んでないバッジがないかチェック
       loggerDebug(`2 ... Collecting badges that exist only in the wallet. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
+      loggerDebug(`2 ... badgeClassIds: ${JSON.stringify([...badgeClassIds])} vadgeVcIds: ${JSON.stringify([...vadgeVcIds])} courseIds: ${JSON.stringify([...courseIds])}`);
       const vcBadges = await getVcBadges(walletId, lmsId);
       for (const vcBadge of vcBadges) {
         if (!vadgeVcIds.has(vcBadge.badgeVcId)) {
@@ -106,6 +107,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       }
       // バッジと紐づかないコースがないかコースリストをもとにチェック
       loggerDebug(`3 ... Collecting courses that are not associated with any badges. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
+      loggerDebug(`3 ... badgeClassIds: ${JSON.stringify([...badgeClassIds])} vadgeVcIds: ${JSON.stringify([...vadgeVcIds])} courseIds: ${JSON.stringify([...courseIds])}`);
       for (const course of courseList) {
         if (!courseIds.has(course.id)) {
           loggerDebug(`3-1 ... Not found course[${course.id}].`);
@@ -129,6 +131,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           });
         }
       }
+      loggerDebug(`4 ... badgeClassIds: ${JSON.stringify([...badgeClassIds])} vadgeVcIds: ${JSON.stringify([...vadgeVcIds])} courseIds: ${JSON.stringify([...courseIds])}`);
     }
     if (errorCodes.length != 0) {
       response.user_badgestatuslist.error_code = errorCodes.at(0);
