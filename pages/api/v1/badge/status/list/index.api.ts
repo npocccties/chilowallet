@@ -55,7 +55,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     let errorCodes: string[] = [];
     let lms_badge_list: IfUserBadgeStatus[] = [];
     let badgeClassIds = new Set<string>();
-    let vadgeVcIds = new Set<string>();
+    let vadgeVcIds = new Set<number>();
     for (const lms of lmsList) {
       if (!lms.ssoEnabled) {
         continue;
@@ -150,7 +150,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
 
 async function collectBadgesBy(
   walletId: number, uniquehash: string, lmsId: number, lmsName: string, lmsUrl: string, errorCodes: string[], courseList: IfCourseInfo[],
-  response: BadgeStatusListResponse, lms_badge_list: IfUserBadgeStatus[], badgeClassIds: Set<string>, vadgeVcIds: Set<string>, dateissued?: number) {
+  response: BadgeStatusListResponse, lms_badge_list: IfUserBadgeStatus[], badgeClassIds: Set<string>, vadgeVcIds: Set<number>, dateissued?: number) {
   let badgeClassId = "";
   let badgeMetaData: BadgeMetaData = undefined;
   let badgeJson: any = undefined;
