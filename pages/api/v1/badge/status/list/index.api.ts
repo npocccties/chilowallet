@@ -54,7 +54,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
 
     let errorCodes: string[] = [];
     let lms_badge_list: IfUserBadgeStatus[] = [];
-    let lmsBadgeMap = new Map<string, IfUserBadgeStatus>();
+    let badgeClassIds = new Set<string>();
+    let vadgeVcIds = new Set<string>();
     for (const lms of lmsList) {
       if (!lms.ssoEnabled) {
         continue;
@@ -89,7 +90,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       for (const badge of badgeList) {
         const uniquehash = badge.uniquehash;
         collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-           response, lms_badge_list, lmsBadgeMap, badge.dateissued);
+           response, lms_badge_list, badgeClassIds, vadgeVcIds, badge.dateissued);
       }
       // バッジと紐づかないコースがないかコースリストをもとにチェック
       loggerDebug(`2 ... Collecting courses that are not associated with any badges. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
@@ -126,7 +127,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           loggerDebug(`3-1 ... Not found vcBadge[${vcBadge.badgeVcId}].`);
           const uniquehash = vcBadge.badgeUniquehash;
           collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-             response, lms_badge_list, lmsBadgeMap, vcBadge.badgeIssuedon?.getTime() ?? undefined);
+             response, lms_badge_list, badgeClassIds, vadgeVcIds, vcBadge.badgeIssuedon?.getTime() ?? undefined);
         }
       }
     }
@@ -149,7 +150,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
 
 async function collectBadgesBy(
   walletId: number, uniquehash: string, lmsId: number, lmsName: string, lmsUrl: string, errorCodes: string[], courseList: IfCourseInfo[],
-  response: BadgeStatusListResponse, lms_badge_list: IfUserBadgeStatus[], lmsBadgeMap: Map<string, IfUserBadgeStatus>, dateissued?: number) {
+  response: BadgeStatusListResponse, lms_badge_list: IfUserBadgeStatus[], badgeClassIds: Set<string>, vadgeVcIds: Set<string>, dateissued?: number) {
   let badgeClassId = "";
   let badgeMetaData: BadgeMetaData = undefined;
   let badgeJson: any = undefined;
@@ -161,7 +162,7 @@ async function collectBadgesBy(
     loggerWarn(`${errors.E10003}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
     errorCodes.push(errors.E10003);
   }
-  if (badgeClassId && lmsBadgeMap.has(badgeClassId)) {
+  if (badgeClassId && badgeClassIds.has(badgeClassId)) {
     loggerWarn(`Duplicate badge class id. badgeClassId: ${badgeClassId} lmsUrl: ${lmsUrl}`);
     return;
   }
@@ -198,6 +199,10 @@ async function collectBadgesBy(
   const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
   loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
   if (vcBadge) {
+    if (vadgeVcIds.has(vcBadge.badgeVcId)) {
+      loggerWarn(`Duplicate badge vc id. badgeVcId: ${vcBadge.badgeVcId} lmsUrl: ${lmsUrl}`);
+      return;
+    }
     const submittedBadge = await credentialDetail({ badgeVcId: vcBadge.badgeVcId, walletId: walletId });
     if (submittedBadge) {
       submitted = submittedBadge.submissions != undefined;
@@ -227,7 +232,10 @@ async function collectBadgesBy(
     course_description: course?.summary,
     badge_json: JSON.stringify(badgeJson),
   });
-  lmsBadgeMap[badgeClassId] = lms_badge_list[lms_badge_list.length - 1];
+  badgeClassIds.add(badgeClassId);
+  if (vcBadge?.badgeVcId) {
+    vadgeVcIds.add(vcBadge?.badgeVcId);
+  }
 
 } 
 
