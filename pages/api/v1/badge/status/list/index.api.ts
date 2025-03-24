@@ -134,6 +134,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     if (errorCodes.length != 0) {
       response.user_badgestatuslist.error_code = errorCodes.at(0);
     }
+    response.user_badgestatuslist.lms_badge_count = lms_badge_list.length;
     response.user_badgestatuslist.lms_badge_list = lms_badge_list;
     loggerDebug(`response: ${JSON.stringify(response)}`);
     loggerInfo(`${logStatus.success} ${apiPath}`);
@@ -236,7 +237,6 @@ async function collectBadgesBy(
     course_description: course?.summary,
     badge_json: JSON.stringify(badgeJson),
   });
-  response.user_badgestatuslist.lms_badge_count = lms_badge_list.length;
   badgeClassIds.add(badgeClassId);
   if (vcBadge?.badgeVcId) {
     vadgeVcIds.add(vcBadge?.badgeVcId);
