@@ -56,7 +56,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     let lms_badge_list: IfUserBadgeStatus[] = [];
     let badgeClassIds = new Set<string>();
     let vadgeVcIds = new Set<number>();
-    let courseIds = new Set<number>();
     for (const lms of lmsList) {
       if (!lms.ssoEnabled) {
         continue;
@@ -64,6 +63,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       const lmsId = lms.lmsId;
       const lmsUrl = lms.lmsUrl;
       loggerDebug(`lms: ${JSON.stringify(lms)}`);
+      let courseIds = new Set<number>();
       var courseList: IfCourseInfo[] = [];
       try {
         courseList = await getCourseListFromMoodle({ walletId, username: eppn, lmsId });
