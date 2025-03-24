@@ -198,10 +198,10 @@ async function collectBadgesBy(
     loggerWarn(`${errors.E10006}: Not found course. alignments_targeturl: ${alignmentsTargeturl} courseId: ${courseId}`);
     errorCodes.push(errors.E10006);
   }
-  if (courseIds.has(courseId)) {
-    loggerWarn(`Duplicate course id. courseId: ${courseId} lmsUrl: ${lmsUrl}`);
-    return;
-  }
+  // if (courseIds.has(courseId)) {
+  //   loggerWarn(`Duplicate course id. courseId: ${courseId} lmsUrl: ${lmsUrl}`);
+  //   return;
+  // }
   courseIds.add(courseId);
   loggerDebug(`badgeClassId: ${badgeClassId}`);
   let submitted = false;
