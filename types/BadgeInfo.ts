@@ -121,6 +121,7 @@ export interface IfUserBadgeStatus {
   course_id: number;
   course_name: string;
   course_description: string;
+  badge_class_id: string,
   badge_json: string;
 }
 

@@ -452,6 +452,9 @@ components:
               course_description:
                 type: string
                 description: 'コースの説明'
+              badge_class_id:
+                type: string
+                description: 'バッジクラスID'
               badge_json:
                 type: string
                 description: 'バッジクラスIDのURLのレスポンスのJSON'
