@@ -129,7 +129,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
             course_description: course?.summary,
             badge_json: null,
           });
-          courseNameIds.add(course.fullname + course.id.toString());
+          // courseNameIds.add(course.fullname + course.id.toString());
         }
       }
       loggerDebug(`[lmsId: ${lmsId}] 4 ... badgeClassIds: ${JSON.stringify([...badgeClassIds])} vadgeVcIds: ${JSON.stringify([...vadgeVcIds])} courseIds: ${JSON.stringify([...courseNameIds])}`);
@@ -205,7 +205,7 @@ async function collectBadgesBy(
       loggerWarn(`Duplicate course id. courseName: ${courseName} courseId: ${courseId} lmsUrl: ${lmsUrl}`);
       return;
     }
-    courseNameIds.add(courseName + courseId.toString());
+    //courseNameIds.add(courseName + courseId.toString());
   }
   loggerDebug(`badgeClassId: ${badgeClassId}`);
   let submitted = false;
@@ -244,10 +244,10 @@ async function collectBadgesBy(
     course_description: course?.summary,
     badge_json: JSON.stringify(badgeJson),
   });
-  badgeClassIds.add(badgeClassId);
-  if (vcBadge?.badgeVcId) {
-    vadgeVcIds.add(vcBadge?.badgeVcId);
-  }
+  // badgeClassIds.add(badgeClassId);
+  // if (vcBadge?.badgeVcId) {
+  //   vadgeVcIds.add(vcBadge?.badgeVcId);
+  // }
 
 } 
 
