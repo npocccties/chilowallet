@@ -96,6 +96,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       loggerDebug(`[lmsId: ${lmsId}] 2 ... Collecting badges that exist only in the wallet. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
       loggerDebug(`[lmsId: ${lmsId}] 2 ... badgeClassIds: ${JSON.stringify([...badgeClassIds])} courseIds: ${JSON.stringify([...courseIds])}`);
       const vcBadges = await getVcBadges(walletId, lmsId);
+      loggerDebug(`[lmsId: ${lmsId}] 2 ... vcBadges: ${JSON.stringify(vcBadges)}`);
       for (const vcBadge of vcBadges) {
         if (!badgeClassIds.has(vcBadge.badgeClassId)) {
           loggerDebug(`2-1 ... Not found vcBadge[${vcBadge.badgeClassId}].`);
