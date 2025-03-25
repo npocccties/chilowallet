@@ -58,6 +58,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     let vadgeVcIds = new Set<number>();
     for (const lms of lmsList) {
       let courseIds = new Set<number>();
+      let courseList: IfCourseInfo[] = [];
       const lmsId = lms.lmsId;
       const vcBadges = await getVcBadges(walletId, lmsId);
       loggerDebug(`[lmsId: ${lmsId}] 2 ... vcBadges: ${JSON.stringify(vcBadges)}`);
@@ -74,7 +75,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       }
       const lmsUrl = lms.lmsUrl;
       loggerDebug(`lms: ${JSON.stringify(lms)}`);
-      var courseList: IfCourseInfo[] = [];
       try {
         courseList = await getCourseListFromMoodle({ walletId, username: eppn, lmsId });
       } catch (e) {
