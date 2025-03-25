@@ -62,7 +62,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       const lmsId = lms.lmsId;
       const lmsUrl = lms.lmsUrl;
       loggerDebug(`lms: ${JSON.stringify(lms)}`);
-      let courseIds = new Set<string>();
+      let courseIds = new Set<number>();
       var courseList: IfCourseInfo[] = [];
       try {
         courseList = await getCourseListFromMoodle({ walletId, username: eppn, lmsId });
@@ -108,7 +108,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       loggerDebug(`[lmsId: ${lmsId}] 3 ... Collecting courses that are not associated with any badges. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
       loggerDebug(`[lmsId: ${lmsId}] 3 ... badgeClassIds: ${JSON.stringify([...badgeClassIds])} courseIds: ${JSON.stringify([...courseIds])}`);
       for (const course of courseList) {
-        if (!courseIds.has(course.id.toString())) {
+        if (!courseIds.has(course.id)) {
           loggerDebug(`3-1 ... Not found course[${course.fullname} ${course.id}].`);
           lms_badge_list.push({
             enrolled: true,//コース主体なのでtrue
@@ -129,7 +129,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
             badge_class_id: null,
             badge_json: null,
           });
-          courseIds.add(course.id.toString());
+          courseIds.add(course.id);
         }
       }
       loggerDebug(`[lmsId: ${lmsId}] 4 ... badgeClassIds: ${JSON.stringify([...badgeClassIds])} courseIds: ${JSON.stringify([...courseIds])}`);
@@ -154,7 +154,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
 
 async function collectBadgesBy(
   walletId: number, uniquehash: string, lmsId: number, lmsName: string, lmsUrl: string, errorCodes: string[], courseList: IfCourseInfo[],
-  response: BadgeStatusListResponse, lms_badge_list: IfUserBadgeStatus[], badgeClassIds: Set<string>, courseIds: Set<string>, dateissued?: number) {
+  response: BadgeStatusListResponse, lms_badge_list: IfUserBadgeStatus[], badgeClassIds: Set<string>, courseIds: Set<number>, dateissued?: number) {
   let badgeClassId = "";
   let badgeMetaData: BadgeMetaData = undefined;
   let badgeJson: any = undefined;
@@ -201,7 +201,7 @@ async function collectBadgesBy(
     errorCodes.push(errors.E10006);
   }
   if (courseId != 0) {
-    courseIds.add(courseId.toString());
+    courseIds.add(courseId);
   }
   loggerDebug(`badgeClassId: ${badgeClassId}`);
   let submitted = false;
