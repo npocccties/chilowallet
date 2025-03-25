@@ -211,6 +211,7 @@ async function collectBadgesBy(
   loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
   if (vcBadge) {
     const submittedBadge = await credentialDetail({ badgeVcId: vcBadge.badgeVcId, walletId: walletId });
+    loggerDebug(`submittedBadge: ${JSON.stringify(submittedBadge)}`);
     if (submittedBadge) {
       submitted = submittedBadge.submissions != undefined;
     }
