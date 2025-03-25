@@ -57,13 +57,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     let badgeClassIds = new Set<string>();
     let vadgeVcIds = new Set<number>();
     for (const lms of lmsList) {
+      let courseIds = new Set<number>();
+      const lmsId = lms.lmsId;
+      const vcBadges = await getVcBadges(walletId, lmsId);
+      loggerDebug(`[lmsId: ${lmsId}] 2 ... vcBadges: ${JSON.stringify(vcBadges)}`);
       if (!lms.ssoEnabled) {
+        for (const vcBadge of vcBadges) {
+          if (!vadgeVcIds.has(vcBadge.badgeVcId)) {
+            loggerDebug(`0 ... Not found vcBadge[badgeVcId: ${vcBadge.badgeVcId} badgeClassId: ${vcBadge.badgeClassId}].`);
+            const uniquehash = vcBadge.badgeUniquehash;
+            await collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
+               response, lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeIssuedon?.getTime() ?? undefined);
+          }
+        }
         continue;
       }
-      const lmsId = lms.lmsId;
       const lmsUrl = lms.lmsUrl;
       loggerDebug(`lms: ${JSON.stringify(lms)}`);
-      let courseIds = new Set<number>();
       var courseList: IfCourseInfo[] = [];
       try {
         courseList = await getCourseListFromMoodle({ walletId, username: eppn, lmsId });
@@ -96,8 +106,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       // ウォレットにしか取り込んでないバッジがないかチェック
       loggerDebug(`[lmsId: ${lmsId}] 2 ... Collecting badges that exist only in the wallet. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
       loggerDebug(`[lmsId: ${lmsId}] 2 ... badgeClassIds: ${JSON.stringify([...badgeClassIds])} vadgeVcIds: ${JSON.stringify([...vadgeVcIds])} courseIds: ${JSON.stringify([...courseIds])}`);
-      const vcBadges = await getVcBadges(walletId, lmsId);
-      loggerDebug(`[lmsId: ${lmsId}] 2 ... vcBadges: ${JSON.stringify(vcBadges)}`);
       for (const vcBadge of vcBadges) {
         if (!vadgeVcIds.has(vcBadge.badgeVcId)) {
           loggerDebug(`2-1 ... Not found vcBadge[badgeVcId: ${vcBadge.badgeVcId} badgeClassId: ${vcBadge.badgeClassId}].`);
