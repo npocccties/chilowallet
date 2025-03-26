@@ -403,7 +403,7 @@ components:
             type: object
             description: 'LMS別のバッジ取得状況'
             properties:
-              accessed:
+              enrolled:
                 type: boolean
                 description: 受講フラグ (コースがLMSにある状態) 
               issued:
@@ -467,7 +467,7 @@ components:
                 type: string
                 description: 'バッジクラスIDのURLのレスポンスのJSON'
             required:
-              - accessed
+              - enrolled
               - issued
               - imported
               - submitted

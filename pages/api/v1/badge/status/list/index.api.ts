@@ -122,7 +122,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         if (!courseIds.has(course.id)) {
           loggerDebug(`3-1 ... Not found course[${course.fullname} ${course.id}].`);
           lms_badge_list.push({
-            accessed: true,//コース主体なのでtrue
+            enrolled: true,//コース主体なのでtrue
             issued: false,//バッジと紐づいてないのでfalse
             imported: false,
             submitted: false,
@@ -233,7 +233,7 @@ async function collectBadgesBy(
     issued_at = convertUNIXorISOstrToJST(dateissued)
   }
   lms_badge_list.push({
-    accessed: course != undefined,//コース有無
+    enrolled: course != undefined,//コース有無
     issued: issued,//バッジ有無
     imported: vcBadge != undefined,
     submitted: submitted,

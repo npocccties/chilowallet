@@ -107,7 +107,7 @@ export interface IfUserBadgeStatusList {
 }
 
 export interface IfUserBadgeStatus {
-  accessed: boolean;
+  enrolled: boolean;
   issued: boolean;
   imported: boolean;
   submitted: boolean;
