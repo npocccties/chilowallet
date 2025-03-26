@@ -61,7 +61,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       let courseList: IfCourseInfo[] = [];
       const lmsId = lms.lmsId;
       const vcBadges = await getVcBadges(walletId, lmsId);
-      loggerDebug(`[lmsId: ${lmsId}] 2 ... vcBadges: ${JSON.stringify(vcBadges)}`);
+      loggerDebug(`[lmsId: ${lmsId}] 0 ... vcBadges: ${JSON.stringify(vcBadges)}`);
       if (!lms.ssoEnabled) {
         for (const vcBadge of vcBadges) {
           if (!vadgeVcIds.has(vcBadge.badgeVcId)) {
@@ -176,10 +176,10 @@ async function collectBadgesBy(
     loggerWarn(`${errors.E10003}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
     errorCodes.push(errors.E10003);
   }
-  if (badgeClassId && badgeClassIds.has(badgeClassId)) {
-    loggerWarn(`Duplicate badge class id. badgeClassId: ${badgeClassId} lmsUrl: ${lmsUrl}`);
-    return;
-  }
+  // if (badgeClassId && badgeClassIds.has(badgeClassId)) {
+  //   loggerWarn(`Duplicate badge class id. badgeClassId: ${badgeClassId} lmsUrl: ${lmsUrl}`);
+  //   return;
+  // }
   try {
     badgeJson = await getBadgeJson(badgeClassId);
     loggerDebug(`badgeJson: ${JSON.stringify(badgeJson)}`);
