@@ -67,8 +67,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           if (!vadgeVcIds.has(vcBadge.badgeVcId)) {
             loggerDebug(`0 ... Not found vcBadge[badgeVcId: ${vcBadge.badgeVcId} badgeClassId: ${vcBadge.badgeClassId}].`);
             const uniquehash = vcBadge.badgeUniquehash;
+            const dateissued = vcBadge.badgeIssuedon ? vcBadge.badgeIssuedon.getTime() / 1000 : undefined;
             await collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-               response, lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeIssuedon?.getTime() ?? undefined);
+               response, lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, dateissued);
           }
         }
         continue;
