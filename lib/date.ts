@@ -38,6 +38,10 @@ export function convertUNIXorISOstrToJST(dateInput: string | number): string | n
 
   // 数字の場合、UNIX Timeとして処理
   if (typeof dateInput === "number") {
+    if (dateInput == 0) {
+      // 1970年とか表示しても嬉しくないので無効扱いとする
+      return null;
+    }
     date = fromUnixTime(dateInput);
   }
   // 文字列の場合、ISO形式として処理
