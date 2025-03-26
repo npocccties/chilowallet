@@ -403,7 +403,7 @@ components:
             type: object
             description: 'LMS別のバッジ取得状況'
             properties:
-              enrolled:
+              accessed:
                 type: boolean
                 description: 受講フラグ (コースがLMSにある状態) 
               issued:
@@ -415,10 +415,18 @@ components:
               submitted:
                 type: boolean
                 description: 提出フラグ (キャビネットにバッジ提出済みの状態)
-              enrolled_at:
+              accessed_at:
                 type: string
                 format: date-time
-                description: 受講日
+                description: コースへの最終アクセス日時
+              lms_start_date:
+                type: string
+                format: date-time
+                description: コースの開始日
+              lms_end_date:
+                type: string
+                format: date-time
+                description: コースの終了日
               issued_at:
                 type: string
                 format: date-time
@@ -459,7 +467,7 @@ components:
                 type: string
                 description: 'バッジクラスIDのURLのレスポンスのJSON'
             required:
-              - enrolled
+              - accessed
               - issued
               - imported
               - submitted

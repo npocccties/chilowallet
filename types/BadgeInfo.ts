@@ -79,13 +79,14 @@ export interface IfCourseInfo {
   fullname: string;     // コース名  
   shortname: string;    // 省略名
   displayname: string;
-  enrolledusercount: number;
+  accessedusercount: number;
   idnumber: string;
   visible: number;
   hidden: boolean;
   summary: string;
   startdate: number;    // 開始日
   enddate?: number;     // 終了日
+  lastaccess?: number;  // コースへの最終アクセス日時
   category?: number;    // カテゴリID
   progress?: number;    // 進捗
   completed?: number;
@@ -106,11 +107,13 @@ export interface IfUserBadgeStatusList {
 }
 
 export interface IfUserBadgeStatus {
-  enrolled: boolean;
+  accessed: boolean;
   issued: boolean;
   imported: boolean;
   submitted: boolean;
-  enrolled_at: string;
+  accessed_at: string;
+  lms_start_date: string;
+  lms_end_date: string;
   issued_at: string;
   imported_at: string;
   badge_expired_at: string;

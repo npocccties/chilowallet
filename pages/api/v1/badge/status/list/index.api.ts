@@ -122,11 +122,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
         if (!courseIds.has(course.id)) {
           loggerDebug(`3-1 ... Not found course[${course.fullname} ${course.id}].`);
           lms_badge_list.push({
-            enrolled: true,//コース主体なのでtrue
+            accessed: true,//コース主体なのでtrue
             issued: false,//バッジと紐づいてないのでfalse
             imported: false,
             submitted: false,
-            enrolled_at: convertUNIXorISOstrToJST(course?.startdate),
+            accessed_at: convertUNIXorISOstrToJST(course?.lastaccess),
+            lms_start_date: convertUNIXorISOstrToJST(course?.startdate),
+            lms_end_date: convertUNIXorISOstrToJST(course?.enddate),
             issued_at: null,//issuedにひきずられる
             imported_at: null,
             badge_expired_at: null,
@@ -231,11 +233,13 @@ async function collectBadgesBy(
     issued_at = convertUNIXorISOstrToJST(dateissued)
   }
   lms_badge_list.push({
-    enrolled: course != undefined,//コース有無
+    accessed: course != undefined,//コース有無
     issued: issued,//バッジ有無
     imported: vcBadge != undefined,
     submitted: submitted,
-    enrolled_at: convertUNIXorISOstrToJST(course?.startdate),
+    accessed_at: convertUNIXorISOstrToJST(course?.lastaccess),
+    lms_start_date: convertUNIXorISOstrToJST(course?.startdate),
+    lms_end_date: convertUNIXorISOstrToJST(course?.enddate),
     issued_at: issued_at,//issuedにひきずられる
     imported_at: convertUTCtoJSTstr(vcBadge?.createdAt),
     badge_expired_at: badgeMetaData?.expires?.toString() ?? null,
