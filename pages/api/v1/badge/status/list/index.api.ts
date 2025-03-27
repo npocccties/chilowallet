@@ -69,7 +69,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
             const uniquehash = vcBadge.badgeUniquehash;
             const dateissued = vcBadge.badgeIssuedon ? vcBadge.badgeIssuedon.getTime() / 1000 : undefined;
             await collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-               lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeVcId, vcBadge.createdAt, dateissued);
+               lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeVcId, vcBadge.createdAt, vcBadge.badgeClassId, dateissued);
           }
         }
         continue;
@@ -102,7 +102,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       for (const badge of badgeList) {
         const uniquehash = badge.uniquehash;
         await collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-           lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, undefined, undefined, badge.dateissued);
+           lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, undefined, undefined, undefined, badge.dateissued);
       }
       // ウォレットにしか取り込んでないバッジがないかチェック
       loggerDebug(`[lmsId: ${lmsId}] 2 ... Collecting badges that exist only in the wallet. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
@@ -112,7 +112,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           loggerDebug(`2-1 ... Not found vcBadge[badgeVcId: ${vcBadge.badgeVcId} badgeClassId: ${vcBadge.badgeClassId}].`);
           const uniquehash = vcBadge.badgeUniquehash;
           await collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-             lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeVcId, vcBadge.createdAt, vcBadge.badgeIssuedon?.getTime() ?? undefined);
+             lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeVcId, vcBadge.createdAt, vcBadge.badgeClassId, vcBadge.badgeIssuedon?.getTime() ?? undefined);
         }
       }
       // バッジと紐づかないコースがないかコースリストをもとにチェック
@@ -167,8 +167,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
 
 async function collectBadgesBy(
   walletId: number, uniquehash: string, lmsId: number, lmsName: string, lmsUrl: string, errorCodes: string[], courseList: IfCourseInfo[],
-  lms_badge_list: IfUserBadgeStatus[], badgeClassIds: Set<string>, vadgeVcIds: Set<number>, courseIds: Set<number>, badgeVcId?: number, badgeVcCreated?: Date, dateissued?: number) {
-  let badgeClassId = "";
+  lms_badge_list: IfUserBadgeStatus[], badgeClassIds: Set<string>, vadgeVcIds: Set<number>, courseIds: Set<number>, badgeVcId?: number,
+  badgeVcCreated?: Date, badgeClassId?: string, dateissued?: number)
+{
   let badgeMetaData: BadgeMetaData = undefined;
   let badgeJson: any = undefined;
   try {
