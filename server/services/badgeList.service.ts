@@ -68,6 +68,8 @@ export const getVcBadge = async (
         badgeVcId: true,
         badgeExpires: true,
         createdAt: true,
+        badgeIssuerName: true,
+        badgeName: true,
       },
       where: {
         badgeClassId: badgeClassId,
@@ -95,6 +97,8 @@ export const getVcBadges = async (
         badgeClassId: true,
         badgeIssuedon: true,
         badgeUniquehash: true,
+        badgeName: true,
+        badgeIssuerName: true,
       },
       where: {
         walletId: walletId,

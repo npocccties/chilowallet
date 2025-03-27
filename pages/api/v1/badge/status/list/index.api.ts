@@ -69,7 +69,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
             const uniquehash = vcBadge.badgeUniquehash;
             const dateissued = vcBadge.badgeIssuedon ? vcBadge.badgeIssuedon.getTime() / 1000 : undefined;
             await collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-               lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeVcId, vcBadge.createdAt, vcBadge.badgeClassId, dateissued);
+               lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeVcId, vcBadge.createdAt, vcBadge.badgeClassId,
+               vcBadge.badgeName, vcBadge.badgeIssuerName, vcBadge.badgeExpires, dateissued);
           }
         }
         continue;
@@ -102,7 +103,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       for (const badge of badgeList) {
         const uniquehash = badge.uniquehash;
         await collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-           lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, undefined, undefined, undefined, badge.dateissued);
+           lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, undefined, undefined, undefined, undefined, undefined, undefined, badge.dateissued);
       }
       // ウォレットにしか取り込んでないバッジがないかチェック
       loggerDebug(`[lmsId: ${lmsId}] 2 ... Collecting badges that exist only in the wallet. lms_badge_list: ${JSON.stringify(lms_badge_list)}`);
@@ -113,7 +114,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
           const uniquehash = vcBadge.badgeUniquehash;
           const dateissued = vcBadge.badgeIssuedon ? vcBadge.badgeIssuedon.getTime() / 1000 : undefined;
           await collectBadgesBy(walletId, uniquehash, lms.lmsId, lms.lmsName, lms.lmsUrl, errorCodes, courseList,
-             lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeVcId, vcBadge.createdAt, vcBadge.badgeClassId, dateissued);
+            lms_badge_list, badgeClassIds, vadgeVcIds, courseIds, vcBadge.badgeVcId, vcBadge.createdAt, vcBadge.badgeClassId,
+            vcBadge.badgeName, vcBadge.badgeIssuerName, vcBadge.badgeExpires, dateissued);
         }
       }
       // バッジと紐づかないコースがないかコースリストをもとにチェック
@@ -142,6 +144,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
             course_description: course?.summary,
             badge_class_id: null,
             badge_json: null,
+            badge_name: null,
+            badge_issuer_name: null,
           });
           courseIds.add(course.id);
         }
@@ -169,7 +173,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
 async function collectBadgesBy(
   walletId: number, uniquehash: string, lmsId: number, lmsName: string, lmsUrl: string, errorCodes: string[], courseList: IfCourseInfo[],
   lms_badge_list: IfUserBadgeStatus[], badgeClassIds: Set<string>, vadgeVcIds: Set<number>, courseIds: Set<number>, badgeVcId?: number,
-  badgeVcCreated?: Date, badgeClassId?: string, dateissued?: number)
+  badgeVcCreated?: Date, badgeClassId?: string, badgeName?: string, badgeIssureName?: string, badgeExpires?: Date, dateissued?: number)
 {
   let badgeMetaData: BadgeMetaData = undefined;
   let badgeJson: any = undefined;
@@ -177,6 +181,7 @@ async function collectBadgesBy(
     badgeMetaData = await myOpenBadge(uniquehash, lmsUrl);
     loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}, badgeMetaData: ${badgeMetaData?.toString() ?? null}`);
     badgeClassId = badgeMetaData.badge.id;
+    badgeName = badgeMetaData.badge.name;
   } catch (e) {
     loggerWarn(`${errors.E10003}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
     errorCodes.push(errors.E10003);
@@ -226,6 +231,9 @@ async function collectBadgesBy(
     if (vcBadge) {
       badgeVcId = vcBadge.badgeVcId;
       badgeVcCreated = vcBadge.createdAt;
+      badgeIssureName = vcBadge.badgeIssuerName;
+      badgeExpires = vcBadge.badgeExpires;
+      badgeName = vcBadge.badgeName;
       const submittedBadge = await credentialDetail({ badgeVcId: vcBadge.badgeVcId, walletId: walletId });
       loggerDebug(`submittedBadge: ${JSON.stringify(submittedBadge)}`);
       if (submittedBadge) {
@@ -258,6 +266,8 @@ async function collectBadgesBy(
     course_description: course?.summary,
     badge_class_id: badgeClassId,
     badge_json: JSON.stringify(badgeJson),
+    badge_name: badgeName,
+    badge_issuer_name: badgeIssureName,
   });
   if (badgeClassId) {
     badgeClassIds.add(badgeClassId);

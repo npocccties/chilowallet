@@ -466,6 +466,12 @@ components:
               badge_json:
                 type: string
                 description: 'バッジクラスIDのURLのレスポンスのJSON'
+              badge_name:
+                type: string
+                description: 'バッジ名'
+              badge_issuer_name:
+                type: string
+                description: 'バッジ発行者'
             required:
               - enrolled
               - issued
