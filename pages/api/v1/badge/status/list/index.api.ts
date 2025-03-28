@@ -270,6 +270,7 @@ async function collectBadgesBy(
   if (issued) {
     issued_at = convertUNIXorISOstrToJST(dateissued)
   }
+  loggerDebug(`badgeExpires type: ${typeof badgeExpires}, value: ${badgeExpires}`);
   lms_badge_list.push({
     enrolled: course != undefined,//コース有無
     issued: issued,//バッジ有無
