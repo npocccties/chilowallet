@@ -33,7 +33,7 @@ export function JSTdatetimeToDisplay(jstDateStr: string): string {
  * @param dateInput UNIX TimeまたはISO形式での日付情報
  * @returns JSTフォーマットの文字列
  */
-export function convertUNIXorISOstrToJST(dateInput: string | number): string | null {
+export function convertUNIXorISOstrToJST(dateInput: string | number | Date): string | null {
   let date: Date;
 
   // 数字の場合、UNIX Timeとして処理
@@ -47,6 +47,9 @@ export function convertUNIXorISOstrToJST(dateInput: string | number): string | n
   // 文字列の場合、ISO形式として処理
   else if (typeof dateInput === "string") {
     date = parseISO(dateInput);
+  }
+  else if (dateInput instanceof Date) {
+    date = dateInput as Date;
   } else {
     return null; // 未知の形式の場合、nullを返す
   }

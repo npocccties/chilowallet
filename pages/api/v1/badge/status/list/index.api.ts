@@ -203,7 +203,7 @@ async function collectBadgesBy(
   let badgeJson: any = undefined;
   try {
     badgeMetaData = await myOpenBadge(uniquehash, lmsUrl);
-    loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}, badgeMetaData: ${badgeMetaData?.toString() ?? null}`);
+    loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}, badgeMetaData: ${JSON.stringify(badgeMetaData)}`);
     badgeClassId = badgeMetaData.badge.id;
     badgeName = badgeMetaData.badge.name;
     badgeExpires = badgeMetaData.expires;
@@ -281,7 +281,7 @@ async function collectBadgesBy(
     lms_end_date: convertUNIXorISOstrToJST(course?.enddate),
     issued_at: issued_at,//issuedにひきずられる
     imported_at: convertUTCtoJSTstr(badgeVcCreated),
-    badge_expired_at: convertUNIXorISOstrToJST(badgeExpires ? badgeExpires.getTime() / 1000 : undefined),
+    badge_expired_at: convertUNIXorISOstrToJST(badgeExpires),
     badge_vc_id: badgeVcId,
     lms_id: lmsId,
     lms_name: lmsName,
