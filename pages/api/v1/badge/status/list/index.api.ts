@@ -280,7 +280,7 @@ async function collectBadgesBy(
     lms_end_date: convertUNIXorISOstrToJST(course?.enddate),
     issued_at: issued_at,//issuedにひきずられる
     imported_at: convertUTCtoJSTstr(badgeVcCreated),
-    badge_expired_at: badgeExpires?.toString() ?? null,
+    badge_expired_at: convertUNIXorISOstrToJST(badgeExpires ? badgeExpires.getTime() / 1000 : undefined),
     badge_vc_id: badgeVcId,
     lms_id: lmsId,
     lms_name: lmsName,
