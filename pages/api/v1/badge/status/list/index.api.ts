@@ -206,6 +206,7 @@ async function collectBadgesBy(
     loggerDebug(`badgeMetaData.id: ${badgeMetaData.id} badgeMetaData.badge.id: ${badgeMetaData.badge.id}, badgeMetaData: ${badgeMetaData?.toString() ?? null}`);
     badgeClassId = badgeMetaData.badge.id;
     badgeName = badgeMetaData.badge.name;
+    badgeExpires = badgeMetaData.expires;
   } catch (e) {
     loggerWarn(`${errors.E10003}: Failed to retrieve badge metadata from the LMS. uniquehash: ${uniquehash} lmsUrl: ${lmsUrl}`);
     errorCodes.push(errors.E10003);
@@ -279,7 +280,7 @@ async function collectBadgesBy(
     lms_end_date: convertUNIXorISOstrToJST(course?.enddate),
     issued_at: issued_at,//issuedにひきずられる
     imported_at: convertUTCtoJSTstr(badgeVcCreated),
-    badge_expired_at: badgeMetaData?.expires?.toString() ?? null,
+    badge_expired_at: badgeExpires?.toString() ?? null,
     badge_vc_id: badgeVcId,
     lms_id: lmsId,
     lms_name: lmsName,
