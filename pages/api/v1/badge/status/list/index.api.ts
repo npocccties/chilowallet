@@ -249,15 +249,8 @@ async function collectBadgesBy(
     courseIds.add(courseId);
   }
   loggerDebug(`badgeClassId: ${badgeClassId}`);
-  let vcBadge: {
-    badgeVcId: number;
-    badgeName: string;
-    badgeIssuerName: string;
-    badgeExpires: Date;
-    createdAt: Date;
-  } = undefined;
   if (badgeVcId == undefined) {
-    vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
+    const vcBadge = await getVcBadge(badgeClassId, walletId, lmsId);
     loggerDebug(`badgeClassId: ${badgeClassId} vcBadge: ${JSON.stringify(vcBadge)} lmsUrl: ${lmsUrl}`);
     if (vcBadge) {
       badgeVcId = vcBadge.badgeVcId;
@@ -272,7 +265,7 @@ async function collectBadgesBy(
       }
     }
   }
-  let issued = vcBadge == undefined;
+  let issued = badgeJson != undefined;
   let issued_at = undefined;
   if (issued) {
     issued_at = convertUNIXorISOstrToJST(dateissued)
