@@ -265,7 +265,7 @@ async function collectBadgesBy(
       }
     }
   }
-  let issued = badgeJson != undefined;
+  const issued = badgeJson && badgeJson.error == undefined;
   let issued_at = undefined;
   if (issued) {
     issued_at = convertUNIXorISOstrToJST(dateissued)
