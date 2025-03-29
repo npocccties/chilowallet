@@ -419,11 +419,11 @@ components:
                 type: string
                 format: date-time
                 description: コースへの最終アクセス日時
-              lms_start_date:
+              course_start_date:
                 type: string
                 format: date-time
                 description: コースの開始日
-              lms_end_date:
+              course_end_date:
                 type: string
                 format: date-time
                 description: コースの終了日

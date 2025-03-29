@@ -124,8 +124,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
             imported: false,
             submitted: false,
             accessed_at: convertUNIXorISOstrToJST(course?.lastaccess),
-            lms_start_date: convertUNIXorISOstrToJST(course?.startdate),
-            lms_end_date: convertUNIXorISOstrToJST(course?.enddate),
+            course_start_date: convertUNIXorISOstrToJST(course?.startdate),
+            course_end_date: convertUNIXorISOstrToJST(course?.enddate),
             issued_at: null,//issuedにひきずられる
             imported_at: null,
             badge_expired_at: null,
@@ -277,8 +277,8 @@ async function collectBadgesBy(
     imported: badgeVcId != undefined,
     submitted: submitted,
     accessed_at: convertUNIXorISOstrToJST(course?.lastaccess),
-    lms_start_date: convertUNIXorISOstrToJST(course?.startdate),
-    lms_end_date: convertUNIXorISOstrToJST(course?.enddate),
+    course_start_date: convertUNIXorISOstrToJST(course?.startdate),
+    course_end_date: convertUNIXorISOstrToJST(course?.enddate),
     issued_at: issued_at,//issuedにひきずられる
     imported_at: convertUTCtoJSTstr(badgeVcCreated),
     badge_expired_at: convertUNIXorISOstrToJST(badgeExpires),

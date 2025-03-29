@@ -112,8 +112,8 @@ export interface IfUserBadgeStatus {
   imported: boolean;
   submitted: boolean;
   accessed_at: string;
-  lms_start_date: string;
-  lms_end_date: string;
+  course_start_date: string;
+  course_end_date: string;
   issued_at: string;
   imported_at: string;
   badge_expired_at: string;
