@@ -7,7 +7,7 @@ import { logStatus } from "@/constants/log";
 import { loggerDebug, loggerError } from "@/lib/logger";
 import { retryRequest } from "@/lib/retryRequest";
 import { encodeReqestGetUrlParams } from "@/lib/url";
-import { IfBadgeInfo } from "@/types/BadgeInfo";
+import { IfBadgeInfo, IfCourseInfo, IfUserInfo } from "@/types/BadgeInfo";
 import { BadgeMetaData } from "@/types/badgeInfo/metaData";
 
 const getMyToken = async (username: string, password: string, selectLms: LmsList): Promise<string> => {
@@ -127,6 +127,64 @@ export const myBadgesList = async (username: string, password: string, selectLms
   }
 };
 
+const getMyCourses = async (token: string, selectLms: LmsList, userid: number): Promise<IfCourseInfo[]> => {
+  const { lmsUrl } = selectLms;
+  const myCoursesURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_enrol_get_users_courses&moodlewsrestformat=json&wstoken=${token}&userid=${userid}`;
+
+  const options: AxiosRequestConfig = {
+    method: "GET",
+    url: myCoursesURL,
+  };
+  try {
+    const { data } = await retryRequest(() => {
+      return axios(options);
+    }, moodleRetryConfig);
+    loggerDebug(`response getMyCourses: ${JSON.stringify(data)}`);
+
+    return data;
+  } catch (err) {
+    loggerError(`${logStatus.error}`, err.message);
+    throw new Error("getMyCourses");
+  }
+};
+
+const getUserByUsername = async (token: string, selectLms: LmsList, username: string): Promise<IfUserInfo[]> => {
+  const { lmsUrl } = selectLms;
+  const userURL = `${lmsUrl}/webservice/rest/server.php?wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&wstoken=${token}&field=username&values[0]=${username}`;
+
+  const options: AxiosRequestConfig = {
+    method: "GET",
+    url: userURL,
+  };
+  try {
+    const { data } = await retryRequest(() => {
+      return axios(options);
+    }, moodleRetryConfig);
+    loggerDebug("response getUser", data);
+
+    return data;
+  } catch (err) {
+    loggerError(`${logStatus.error}`, err.message);
+    throw new Error("getUserByUsername");
+  }
+};
+
+export const myCoursesList = async (username: string, selectLms: LmsList): Promise<IfCourseInfo[]> => {
+  try {
+    let token = await getMyTokenAdmin(username, selectLms);
+    const userInfos: IfUserInfo[] = await getUserByUsername(token, selectLms, username);
+    if (userInfos.length == 0) {
+      throw new Error(`Not found user. ${username}`);
+    }
+    const coursesInfos: IfCourseInfo[] = await getMyCourses(token, selectLms, userInfos[0].id);
+
+    return coursesInfos;
+  } catch (err) {
+    loggerError(`${logStatus.error} server/service/lmsAccess.service myCoursesList`);
+    throw err;
+  }
+};
+
 export const myOpenBadge = async (uniquehash: string, lmsUrl: string): Promise<BadgeMetaData> => {
   const myOpenBadgeURL = `${lmsUrl}/badges/assertion.php?obversion=2&b=${uniquehash}`;
   try {
@@ -137,6 +195,19 @@ export const myOpenBadge = async (uniquehash: string, lmsUrl: string): Promise<B
     return openBadgeMeta;
   } catch (err) {
     loggerError(`${logStatus.error} server/services/lmsAccess.service myOpenBadge`);
+    throw err;
+  }
+};
+
+export const getBadgeJson = async (url: string): Promise<any> => {
+  try {
+    const openBadgeMeta = await retryRequest(() => {
+      return axios.get(url).then((res) => res.data);
+    }, moodleRetryConfig);
+
+    return openBadgeMeta;
+  } catch (err) {
+    loggerError(`${logStatus.error} server/services/lmsAccess.service badgeJson`);
     throw err;
   }
 };

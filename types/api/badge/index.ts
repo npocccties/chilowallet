@@ -1,4 +1,4 @@
-import { IfBadgeInfo } from "@/types/BadgeInfo";
+import { IfBadgeInfo, IfUserBadgeStatusList } from "@/types/BadgeInfo";
 import { BadgeMetaData } from "@/types/badgeInfo/metaData";
 
 export type BadgeListReqestParam = {
@@ -25,4 +25,8 @@ export type BadgeImportRequestParam = {
   badgeMetaData: BadgeMetaData;
   lmsId: number;
   lmsName: string;
+};
+
+export type BadgeStatusListResponse = {
+  user_badgestatuslist: IfUserBadgeStatusList;
 };

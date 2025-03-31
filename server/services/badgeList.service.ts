@@ -56,3 +56,58 @@ export const getBadgeListFromMoodle = async ({
     throw e;
   }
 };
+
+export const getVcBadge = async (
+  badgeClassId: string,
+  walletId: number,
+  lmsId: number,
+) => {
+  const [badgeVcs] = await Promise.all([
+    prisma.badgeVc.findFirst({
+      select: {
+        badgeVcId: true,
+        badgeExpires: true,
+        createdAt: true,
+        badgeIssuerName: true,
+        badgeName: true,
+      },
+      where: {
+        badgeClassId: badgeClassId,
+        walletId: walletId,
+        lmsId: lmsId,
+      },
+    }),
+  ]);
+  if (!badgeVcs) {
+    return undefined;
+  }
+  return badgeVcs;
+};
+
+export const getVcBadges = async (
+  walletId: number,
+  lmsId: number,
+) => {
+  const [badgeVcs] = await Promise.all([
+    prisma.badgeVc.findMany({
+      select: {
+        badgeVcId: true,
+        badgeExpires: true,
+        createdAt: true,
+        badgeClassId: true,
+        badgeIssuedon: true,
+        badgeUniquehash: true,
+        badgeName: true,
+        badgeIssuerName: true,
+      },
+      where: {
+        walletId: walletId,
+        lmsId: lmsId,
+      },
+    }),
+  ]);
+  if (!badgeVcs) {
+    return undefined;
+  }
+  return badgeVcs;
+};
