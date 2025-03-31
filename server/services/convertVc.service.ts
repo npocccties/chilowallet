@@ -1,4 +1,3 @@
-import { Manifest } from "next/dist/lib/metadata/types/manifest-types";
 import { issue } from "./issue.service";
 import { issueRequest } from "./issueRequest.service";
 import { getManifest } from "./manifest.service";

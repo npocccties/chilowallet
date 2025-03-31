@@ -9,6 +9,7 @@ export const api = {
       convert: "/api/v1/badge/convert",
       metadata: "/api/v1/badge/metadata",
       list: "/api/v1/badge/list",
+      status_list: "/api/v1/badge/status/list",
     },
     submission: {
       sendmail: "/api/v1/submission/sendmail",
