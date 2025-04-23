@@ -66,7 +66,12 @@ export const getServerSideProps = async function (
     const extractBadgeData = await extractOpenBadgeMetadataFromImage(badgeExportData);
     const badgeMetaData: WisdomBadgeInfo = extractBadgeData.badge;
     const { courseInfo, knowledgeBadges } = await getKnowledgeBadges(badgeMetaData);
-
+    const badgeDescription = badgeMetaData.description;
+    /*
+    const courseInfo: Alignment = {targetName: "test", targetUrl: "http://localhost"}
+    const knowledgeBadges: KnowledgeBadges = [{badgeName: "test"}]
+    const badgeDescription: string = "テスト用のディスクリプション情報"
+    */
     const submissionsHistories = submissions.map((sub): BadgeVcSubmission => {
       return {
         consumerName: sub.consumerName,
@@ -74,7 +79,7 @@ export const getServerSideProps = async function (
       };
     });
 
-    const vcDetailData: VcDetailData = createVcDetailData(badgeVc, submissionsHistories, courseInfo);
+    const vcDetailData: VcDetailData = createVcDetailData(badgeVc, submissionsHistories, courseInfo, badgeDescription);
 
     loggerInfo(`${logStatus.success} ${page}`);
     loggerInfo(logEndForPageSSR(page));
