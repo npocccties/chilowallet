@@ -1,9 +1,11 @@
-import { Flex, Box, Container, Stack, useDisclosure, Drawer, DrawerContent, DrawerOverlay } from "@chakra-ui/react";
+import { Flex, Box, Container, Stack } from "@chakra-ui/react";
 import React from "react";
 
-import { Footer } from "./Footer";
-import { Header } from "./Header";
-import { SidebarContent } from "./Sidebar";
+// import { Footer } from "./Footer";
+// import { Header } from "./Header";
+
+import PortalFooter from "@/components/portal_components/PortalFooter";
+import PortalHeader from "@/components/portal_components/PortalHeader";
 
 export interface LayoutProps {
   children: React.ReactNode;
@@ -14,10 +16,11 @@ export interface LayoutProps {
 }
 
 export const Layout: React.VFC<LayoutProps> = ({ children, maxW, textAlign, align, showHeaderContents = true }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <Flex minHeight={"100vh"} direction={"column"}>
-      <Header onOpen={onOpen} showContents={showHeaderContents} />
+      <PortalHeader showContents={showHeaderContents}/>
+      {/* 
       <Drawer
         isOpen={isOpen}
         placement="left"
@@ -31,6 +34,7 @@ export const Layout: React.VFC<LayoutProps> = ({ children, maxW, textAlign, alig
           <SidebarContent onClose={onClose} />
         </DrawerContent>
       </Drawer>
+      */}
       <Box flex={1}>
         <Container maxW={maxW}>
           <Stack textAlign={textAlign} align={align} spacing={{ base: 8, sm: 10 }} py={{ base: 20, sm: 28 }}>
@@ -38,7 +42,7 @@ export const Layout: React.VFC<LayoutProps> = ({ children, maxW, textAlign, alig
           </Stack>
         </Container>
       </Box>
-      <Footer />
+      <PortalFooter className="shrink-0 w-full"></PortalFooter>
     </Flex>
   );
 };
