@@ -22,7 +22,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     const bodyString = Buffer.concat(chunks).toString();
     const params = new URLSearchParams(bodyString);
-    const submissionRaw = params.get("Submission");
+    const submissionRaw = params.get("post_json");
 
     if (!submissionRaw) {
       return {
