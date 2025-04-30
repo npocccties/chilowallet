@@ -5,6 +5,9 @@ import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { SidebarContent } from "./Sidebar";
 
+import { ReturnButton } from "@/components/ui/button/ReturnButton";
+import { useBackUrl } from "@/functions/useBackUrl"
+
 export interface LayoutProps {
   children: React.ReactNode;
   showHeaderContents?: boolean;
@@ -15,9 +18,23 @@ export interface LayoutProps {
 
 export const Layout: React.VFC<LayoutProps> = ({ children, maxW, textAlign, align, showHeaderContents = true }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const returnTo = useBackUrl();
   return (
-    <Flex minHeight={"100vh"} direction={"column"}>
+    <Flex minHeight={"100vh"} direction={"column"} 
+      justify={"center"}
+      position={"relative"}
+      align={"center"}
+      overflow={"visible"}
+      >
       <Header onOpen={onOpen} showContents={showHeaderContents} />
+      <Box ml="-50%" mt="5">
+        <ReturnButton 
+          as="a"
+          href={returnTo} 
+          color={"black"}>
+            戻る
+        </ReturnButton>
+      </Box>
       <Drawer
         isOpen={isOpen}
         placement="left"
@@ -31,7 +48,7 @@ export const Layout: React.VFC<LayoutProps> = ({ children, maxW, textAlign, alig
           <SidebarContent onClose={onClose} />
         </DrawerContent>
       </Drawer>
-      <Box flex={1}>
+      <Box flex={2}>
         <Container maxW={maxW}>
           <Stack textAlign={textAlign} align={align} spacing={{ base: 8, sm: 10 }} py={{ base: 20, sm: 28 }}>
             {children}
