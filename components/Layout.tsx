@@ -1,13 +1,11 @@
 import { Flex, Box, Container, Stack } from "@chakra-ui/react";
 import React from "react";
 
-
-
+import PortalFooter from "@/components/portal_components/PortalFooter";
+import PortalHeader from "@/components/portal_components/PortalHeader";
 import { ReturnButton } from "@/components/ui/button/ReturnButton";
 import { useBackUrl } from "@/functions/useBackUrl"
 
-import PortalFooter from "@/components/portal_components/PortalFooter";
-import PortalHeader from "@/components/portal_components/PortalHeader";
 
 export interface LayoutProps {
   children: React.ReactNode;
@@ -28,13 +26,21 @@ export const Layout: React.VFC<LayoutProps> = ({ children, maxW, textAlign, alig
       overflow={"visible"}
       >
       <PortalHeader showContents={showHeaderContents}/>
+      <Box ml="-50%" mt="5">
+        <ReturnButton 
+          as="a"
+          href={returnTo} 
+          color={"black"}>
+            戻る
+        </ReturnButton>
+      </Box>
       {/* 
       <Box ml="-50%" mt="5">
         <ReturnButton 
           as="a"
           href={returnTo} 
           color={"black"}>
-            �߂�
+            �߂�
         </ReturnButton>
       </Box>
       <Drawer
