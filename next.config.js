@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 
+const { attachReactRefresh } = require('next/dist/build/webpack-config');
+
 const isProduction = process.env.NODE_ENV == "production";
 
 const nextConfig = {

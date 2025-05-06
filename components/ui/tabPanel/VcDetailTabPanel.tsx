@@ -13,8 +13,9 @@ type Props = {
   expired: boolean;
 };
 
-export const VcDetailTabPanel = ({ vcDetailData, knowledgeBadges, submissionsHistories, expired }: Props) => {
-  const { badgeEarnerEmail, badgeIssuerName, badgeExpires, courseUrl } = vcDetailData;
+export const VcDetailTabPanel = ({ 
+  vcDetailData, knowledgeBadges, submissionsHistories, expired}: Props) => {
+  const { badgeEarnerEmail, badgeIssuerName, badgeExpires, courseUrl, badgeIssuedon } = vcDetailData;
   return (
     <Tabs size="md" variant="enclosed">
       <TabList mb={6}>
@@ -26,6 +27,7 @@ export const VcDetailTabPanel = ({ vcDetailData, knowledgeBadges, submissionsHis
         <TabPanel>
           <CredentialSubjectItem name="email" data={badgeEarnerEmail} />
           <CredentialSubjectItem name="発行者" data={badgeIssuerName} />
+          <CredentialSubjectItem name="発行日" data={badgeIssuedon} />
           <CredentialSubjectItem name="有効期限" data={JSTdateToDisplay(badgeExpires)} isDanger={expired} />
           <CredentialSubjectItem name="コース情報" data={courseUrl} />
         </TabPanel>
