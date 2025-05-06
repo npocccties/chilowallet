@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import { Layout } from "@/components/Layout";
 import { Metatag } from "@/components/Metatag";
-import { SubmissionBadge } from "@/components/page/submission/SubmissionBadge";
 import { PageTitle } from "@/components/ui/text/PageTitle";
 import { SERVICE_NAME, SERVICE_DESCRITION } from "@/configs";
 import { pageName, pagePath } from "@/constants";
@@ -63,11 +62,15 @@ export async function getServerSideProps(context): Promise<GetServerSidePropsRes
 }
 
 const SubmissionEnterPage = (props: SubmissionEntry) => {
-  const { badgeConsumers, vcImage, badgeVcId, badgeName, badgeIssuedon } = props;
+  
+  //const { badgeConsumers, vcImage, badgeVcId, badgeName, badgeIssuedon } = props;
+  loggerInfo(`${props}`)
+  
   return (
     <Layout align="center" textAlign="center" maxW="md">
       <Metatag title={SERVICE_NAME} description={SERVICE_DESCRITION} />
       <PageTitle title={pageName.submission} />
+      {/*DEPRECATED 
       <SubmissionBadge
         badgeConsumers={badgeConsumers}
         vcImage={vcImage}
@@ -75,6 +78,7 @@ const SubmissionEnterPage = (props: SubmissionEntry) => {
         badgeName={badgeName}
         badgeIssuedon={badgeIssuedon}
       />
+      */}
     </Layout>
   );
 };

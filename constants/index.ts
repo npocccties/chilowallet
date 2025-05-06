@@ -33,6 +33,7 @@ export const sessionStorageKey = {
   externalLinkageId: "externalLinkageId",
   consumer: "consumer",
   badgeVc: "badgeVc",
+  badgeVcList: "submission.badgeVcList",
 } as const;
 
 export const submissionResult = {

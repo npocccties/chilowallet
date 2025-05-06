@@ -1,4 +1,5 @@
 import "../styles/globals.css";
+import "@fortawesome/fontawesome-svg-core/styles.css";
 import { ChakraProvider } from "@chakra-ui/react";
 import { RecoilRoot, RecoilEnv } from "recoil";
 
