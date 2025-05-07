@@ -1,10 +1,16 @@
-import { loggerError } from "@/lib/logger";
+import { loggerError, loggerInfo } from "@/lib/logger";
 import prisma, { Prisma } from "@/lib/prisma";
 
 export const createBadgeVc = async (input: Prisma.BadgeVcCreateInput) => {
   try {
+    // Ensure createdAt is set if not provided
+    const data = {
+      ...input,
+      createdAt: input.createdAt || new Date(), // Set current date if createdAt is missing
+    };
+
     await prisma.badgeVc.create({
-      data: input,
+      data,
     });
   } catch (e) {
     loggerError("failed to saveBadgeVc", e.message);

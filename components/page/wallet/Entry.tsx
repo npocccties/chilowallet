@@ -48,11 +48,11 @@ export const EntryWallet = () => {
       </Box>
       <BasicDialog
         title="バッジウォレットの作成が完了しました！"
-        okButtonrText="マイウォレットへ"
+        okButtonrText="インポートページへ"
         isOpen={isOpen}
         onClose={() => {}}
         cancelRef={cancelRef}
-        handleOkClick={() => router.push(pagePath.credential.list)}
+        handleOkClick={() => router.push(pagePath.badge.import)}
       />
     </Flex>
   );

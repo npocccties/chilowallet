@@ -4,14 +4,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion";
 import React from 'react';
 
-
-
 type StatusIconProps = {
   status: "importing" | "complete" | "paused" | "error";
   reason_code?: number | string;
+  isShowError?: boolean | true 
 };
 
-export const StatusIcon: React.FC<StatusIconProps> = ({ status, reason_code }) => {
+export const StatusIcon: React.FC<StatusIconProps> = ({ status, reason_code, isShowError }) => {
   let color = "#1e3050"; // importing 用の色
   const code = Number(reason_code);
   console.log("[StatusIcon] reason_code:", reason_code, "→ parsed:", code);
@@ -49,15 +48,19 @@ export const StatusIcon: React.FC<StatusIconProps> = ({ status, reason_code }) =
           <FontAwesomeIcon icon={faSpinner} style={{ fontSize: "50px" }} />
         </motion.div>
       ) : status === "error" ? (
-        <Popover placement="bottom-start" isLazy>
-          <PopoverTrigger>
-            <Image src={getImageSrc(status)} alt={status} boxSize="50px" />
-          </PopoverTrigger>
-          <PopoverContent w="fit-content" bg="gray.700" color="white" border="none">
-            <PopoverArrow bg="gray.700" />
-            <PopoverBody>{getErrorMessage()}</PopoverBody>
-          </PopoverContent>
-        </Popover>
+        isShowError ? (
+          <Popover placement="bottom-start" isLazy>
+            <PopoverTrigger>
+              <Image src={getImageSrc(status)} alt={status} boxSize="50px" />
+            </PopoverTrigger>
+            <PopoverContent w="fit-content" bg="gray.700" color="white" border="none">
+              <PopoverArrow bg="gray.700" />
+              <PopoverBody>{getErrorMessage()}</PopoverBody>
+            </PopoverContent>
+          </Popover>
+        ) : (
+          <Image src={getImageSrc(status)} alt={status} boxSize="50px" />
+        )
       ) : (
         <Image src={getImageSrc(status)} alt={status} boxSize="50px" />
       )}

@@ -37,7 +37,6 @@ export const getBadgeListFromMoodle = async ({
 
   try {
     const badgeList: IfBadgeInfo[] = await myBadgesList(username, password, selectLms);
-
     badgeList.map((badge) => {
       if (badgeVcs.some((x) => x.badgeUniquehash === badge.uniquehash)) {
         badge.vcConverted = true;

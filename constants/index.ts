@@ -34,6 +34,7 @@ export const sessionStorageKey = {
   consumer: "consumer",
   badgeVc: "badgeVc",
   badgeVcList: "submission.badgeVcList",
+  postedBadgeList: "postedBadgeList"
 } as const;
 
 export const submissionResult = {

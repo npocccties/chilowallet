@@ -37,6 +37,7 @@ export const registerBadgeVc = async ({ walletId, lmsId, lmsName, uniquehash, ba
     vcDataHeader: decodeVcHeader,
     vcDataPayload: decodeVcPayload,
     vcDataSignature: vcSignature,
+    createdAt: new Date(),
   };
 
   await createBadgeVc(input);
