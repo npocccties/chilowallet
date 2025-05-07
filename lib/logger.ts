@@ -1,7 +1,7 @@
 import pino from "pino";
 
 const pinoConfig = {
-  level: process.env.LOG_LEVEL,
+  level: process.env.LOG_LEVEL || "info", //デフォルトをINFOとする。
   formatters: {
     level: (label: string) => {
       return {

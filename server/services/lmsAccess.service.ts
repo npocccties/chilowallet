@@ -4,7 +4,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { moodleRetryConfig } from "@/configs/retry";
 import { errors } from "@/constants/error";
 import { logStatus } from "@/constants/log";
-import { loggerDebug, loggerError } from "@/lib/logger";
+import { loggerDebug, loggerError, loggerInfo } from "@/lib/logger";
 import { retryRequest } from "@/lib/retryRequest";
 import { encodeReqestGetUrlParams } from "@/lib/url";
 import { IfBadgeInfo, IfCourseInfo, IfUserInfo } from "@/types/BadgeInfo";

@@ -1,23 +1,30 @@
 import { GetServerSideProps, GetServerSidePropsResult } from "next";
-import React, { useState } from "react";
+import { useRouter } from "next/router";
+import React, { useState, useEffect } from "react";
 
 import { Layout } from "@/components/Layout";
 import { Metatag } from "@/components/Metatag";
-import { BadgeList } from "@/components/page/badge/List";
-import { VcImport } from "@/components/page/badge/VcImport";
+import { ImportingBadgeStatusList, BadgeList } from "@/components/page/badge/ListInLmslist";
+import { Load } from "@/components/page/badge/Load";
 import { PageTitle } from "@/components/ui/text/PageTitle";
 import { SERVICE_DESCRITION, SERVICE_NAME } from "@/configs";
-import { pageName, pagePath } from "@/constants";
+import { pageName, pagePath, sessionStorageKey } from "@/constants";
 import { errors } from "@/constants/error";
 import { logEndForPageSSR, logStartForPageSSR, logStatus } from "@/constants/log";
+import { getPostBadgeList, PostedBadgeList } from "@/functions/getPostbody";
+import { getIfBadgeInfoSSO } from "@/functions/importBadge";
+import { restorePostedDataInSessionStorage } from "@/functions/storePostedBadgeList";
 import { loggerError, loggerInfo } from "@/lib/logger";
 import { getUserInfoFormJwt } from "@/lib/userInfo";
 import { findAllSafeLmsList } from "@/server/repository/lmsList";
 import { getWalletId } from "@/server/services/wallet.service";
+import { BadgeMetaData } from "@/types/badgeInfo/metaData";
 import { SafeLmsList } from "@/types/lms";
 
 type Props = {
   lmsList: SafeLmsList[];
+  postedBadgeList: PostedBadgeList;
+  isFoundWallet: boolean;
 };
 
 const page = pagePath.badge.import;
@@ -27,38 +34,95 @@ export const getServerSideProps: GetServerSideProps = async ({ req }): Promise<G
 
   const session_cookie = req.cookies.session_cookie;
   const { eppn } = getUserInfoFormJwt(session_cookie);
-
+  let isFoundWallet = false
   try {
-    await getWalletId(eppn);
+    const id = await getWalletId(eppn);
+    if (id) {
+      isFoundWallet = true
+    }
+    loggerInfo(`Found walletId: ${id}`);
   } catch (e) {
-    loggerError(`${logStatus.error} ${page}`, e.message);
-    return { redirect: { destination: pagePath.credential.list, statusCode: 302 } };
+    loggerInfo(`Not found walletId`);
   }
 
   try {
     const lmsList = await findAllSafeLmsList();
-
     loggerInfo(`${logStatus.success} ${page}`);
+    const postedBadgeList = await getPostBadgeList(req)
     loggerInfo(logEndForPageSSR(page));
-
-    return { props: { lmsList } };
+    return { 
+      props: { 
+        lmsList: lmsList, 
+        postedBadgeList: postedBadgeList, 
+        isFoundWallet: isFoundWallet
+      } 
+    };
   } catch (e) {
     loggerError(`${logStatus.error} ${page}`, e.message);
     throw new Error(errors.response500.message);
   }
 };
 
-const ImportVCPage = (props: Props) => {
-  const [isBadgeSelect, setIsBadgeSelect] = useState(false);
-  const pageWidth = isBadgeSelect ? "md" : "2xl";
+
+const ImportVCPage = (props: Props) => {  
+  const { lmsList, postedBadgeList, isFoundWallet } = props;
+  const [importBadges, setImportBadges] = useState([]);
+  const [metaDataList, setMetaDataList] = useState<BadgeMetaData[]>([]);
+  const [isBadgeSelect, setIsBadgeSelect] = useState<boolean | null>(null);
+  const pageWidth = "md";
+  const router = useRouter();
+  
+  useEffect(() => {
+    console.debug("postedBadgeList", postedBadgeList);
+    const restoredList = restorePostedDataInSessionStorage(
+      postedBadgeList.badgeList,
+      sessionStorageKey.postedBadgeList
+    );
+    console.debug("restoredList", restoredList);
+    if (isFoundWallet === false) {
+      console.info("Go to create wallet page");
+      router.push(pagePath.entry);
+    } else {
+      // インポート対象バッジがある場合、インポートページへ
+      setIsBadgeSelect(restoredList.length > 0);
+      const fetchBadges = async () => {
+        const iBs = await getIfBadgeInfoSSO(restoredList);
+        console.debug("importBadges", iBs);
+        setImportBadges(iBs);
+      };
+      fetchBadges();
+    }
+  }, []); //描画時に一度だけ実行
+  
+  // BadgeListから選択されたバッジを取得し、インポートページへ
+  const selectImportBadges = (badgeList: ImportingBadgeStatusList) => {
+    console.debug("selectImportBadges", badgeList);
+    setImportBadges(badgeList.badgeList);
+    setMetaDataList(badgeList.metaDataList);
+    setIsBadgeSelect(true);
+  }
+  if (isBadgeSelect === null) {
+    return (
+      <Layout align="center" textAlign="center" maxW={pageWidth}>
+        <></> 
+      </Layout>
+    )
+  }
+
   return (
     <Layout align="center" textAlign="center" maxW={pageWidth}>
       <Metatag title={SERVICE_NAME} description={SERVICE_DESCRITION} />
-      <PageTitle title={pageName.badge.import} />
-      {isBadgeSelect ? (
-        <VcImport setIsBadgeSelect={setIsBadgeSelect} />
+      {isFoundWallet ? (
+      <>
+        <PageTitle title={pageName.badge.import} />
+        {isBadgeSelect === true ? (
+          <Load badgeList={importBadges} metaDataList={metaDataList} />
+        ) : (
+          <BadgeList lmsList={lmsList} cbBadgeSelect={selectImportBadges} />
+        )}
+      </>
       ) : (
-        <BadgeList lmsList={props.lmsList} setIsBadgeSelect={setIsBadgeSelect} />
+      <></>
       )}
     </Layout>
   );
