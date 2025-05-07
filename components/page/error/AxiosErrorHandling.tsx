@@ -23,7 +23,7 @@ export const AxiosErrorHandling = (props: Props) => {
   const { children } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [unexpectedError, setUnexpectedError] = useState(false);
-  const [serverError, setServerError] = useState(false);
+  // const [serverError, setServerError] = useState(false);
   const [clientReqestError, setClientReqestError] = useState(false);
   const [UnAuthrized, setUnAuthrized] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -58,7 +58,7 @@ export const AxiosErrorHandling = (props: Props) => {
             setErrorMessage(detailmessage);
             return Promise.reject(error.response?.data);
           case 500:
-            setServerError(true);
+            // setServerError(true);
             setErrorMessage(detailmessage);
             return Promise.reject(error.response?.data);
           default:
@@ -98,7 +98,7 @@ export const AxiosErrorHandling = (props: Props) => {
               setIsOpen={setIsOpen}
             />
           )}
-          {serverError && (
+          {/*serverError && (
             <ErrorDialog
               title={errors.response500.label}
               message={errors.response500.message}
@@ -106,7 +106,7 @@ export const AxiosErrorHandling = (props: Props) => {
               isOpen={isOpen}
               setIsOpen={setIsOpen}
             />
-          )}
+          )*/}
           {clientReqestError && (
             <ErrorDialog
               title={errors.response400.label}
