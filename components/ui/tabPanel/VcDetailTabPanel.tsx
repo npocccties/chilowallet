@@ -66,7 +66,7 @@ const CredentialSubjectItem: React.FC<CredentialSubjectItemProps> = ({ name, dat
         </Text>
       ) : data ? (
         <Text fontSize="md" mb={1}>
-          {data}
+          {typeof data === "string" ? data : data.toLocaleString()} {/* Date を文字列に変換 */}
         </Text>
       ) : (
         <Text fontSize="md" mb={1}>

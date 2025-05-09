@@ -101,7 +101,7 @@ const BadgeDataItem: React.FC<BadgeDataItemProps> = ({ name, data }) => {
         {name}
       </Text>
       <Text fontSize="lg" my={8} textAlign={"left"}>
-        {data}
+        {typeof data === "string" ? data : data.toLocaleString()} {/* Date を文字列に変換 */}
       </Text>
       <Divider mb={8} />
     </Box>

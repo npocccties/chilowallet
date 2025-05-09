@@ -4,7 +4,11 @@ import React, { ReactNode } from "react";
 import { Loading } from "@/components/Loading";
 import { processingScreenGetters } from "@/share/store/ui/processingScreen/man";
 
-export const ProcessingScreen: React.FC<ReactNode> = ({ children }) => {
+interface ProcessingScreenProps {
+  children: ReactNode;
+}
+
+export const ProcessingScreen: React.FC<ProcessingScreenProps> = ({ children }) => {
   const showContents = processingScreenGetters.useProcessingScreen();
   if (showContents) {
     return (
