@@ -62,7 +62,7 @@ function Menu({ open, onClose }: Props) {
                   <Icon className="text-xl text-black" icon="fa6-solid:xmark" />
                 </button>
               </div>
-              <ul className="mb-12 space-y-1">
+              <ul className={`mb-12 space-y-7`}>
                 <li>
                   <Link
                     className="jumpu-text-button font-bold w-full text-gray-700 hover:bg-gray-100"
@@ -87,11 +87,11 @@ function Menu({ open, onClose }: Props) {
                     学びを探す
                   </Link>
                 </li>
+                <p className={`text-gray-400 font-bold space-y-5`}>
+                  発行元
+                </p>
                 <li>
-                  <p className="text-gray-400 font-bold px-[1.25em] py-[0.75em]">
-                    発行元
-                  </p>
-                  <ul className="pl-4 mb-3 space-y-1">
+                  <ul className={`pl-4 mb-3 space-y-5`}>
                     {issuers.map((issuer, index) => (
                         <li key={index} role="menuitem">
                           <Link
@@ -106,7 +106,7 @@ function Menu({ open, onClose }: Props) {
                   </ul>
                 </li>
               </ul>
-              <ul className="space-y-1">
+              <ul className={`space-y-7`}>
                 {footerInfos.map((content) => (
                   <li key={id}>
                     <Link
@@ -118,7 +118,6 @@ function Menu({ open, onClose }: Props) {
                   </li>
                 ))}
               </ul>
-              
             </DialogPanel>
           </div>
         </TransitionChild>

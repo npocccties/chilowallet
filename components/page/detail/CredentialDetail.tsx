@@ -6,7 +6,6 @@ import React from "react";
 
 import { BadgeVcCardDetail } from "@/components/ui/card/BadgeVcCardDetail";
 import { VcDetailTabPanel } from "@/components/ui/tabPanel/VcDetailTabPanel";
-import { pagePath } from "@/constants";
 import { isBefoerCurrentTimeJST } from "@/lib/date";
 import { vcDetailActions } from "@/share/store/credentialDetail/main";
 import { processingScreenActions } from "@/share/store/ui/processingScreen/man";
@@ -30,7 +29,10 @@ export const CredentialDetail: React.FC<CredentialDetailData> = ({
   const handleClickDelete = async () => {
     showProcessingScreen(async () => {
       await deleteCredential(vcDetailData.badgeVcId);
-      router.push(pagePath.credential.list);
+      // 削除後、戻る先は「戻る」ボタンと同じ
+      const backUrl = sessionStorage.getItem("back_url") || process.env.NEXT_PUBLIC_BACK_URL;
+      console.debug(`backUrl: ${backUrl}`);
+      router.push(backUrl);
     });
   };
   return (

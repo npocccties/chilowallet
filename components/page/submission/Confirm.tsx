@@ -9,11 +9,12 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
+import Load from "@/components/page/submission/Load";
 import { PrimaryButton } from "@/components/ui/button/PrimaryButton";
 import { SecondaryButton } from "@/components/ui/button/SecondaryButton";
-import { pagePath, sessionStorageKey } from "@/constants";
+import { sessionStorageKey } from "@/constants";
 
 type ConsumerData = {
   consumerId: number;
@@ -36,51 +37,38 @@ type Props = {
 const Confirm = ({ consumer, badgeList }: Props) => {
   const router = useRouter();
   const [codeInput, setCodeInput] = useState("");
+  const [isConfirmed, setIsConfirmed] = useState(false);
+
   const badgeVc = Array.isArray(badgeList) ? badgeList[0] : badgeList;
   const badgeVcId = router.query.badge_vc_id;
 
   const submissionEmail = sessionStorage.getItem(sessionStorageKey.submissionEmail);
   const externalLinkageId = sessionStorage.getItem(sessionStorageKey.externalLinkageId);
 
-  // 提出処理
+  useEffect(() => {
+    // 戻るボタンでの状態遷移に対応
+    window.onpopstate = (event) => {
+      if (!event.state?.isConfirmed) {
+        setIsConfirmed(false);
+      }
+    };
+  }, []);
+
   const handleOpenModal = async () => {
     const hashConfirmCode = sessionStorage.getItem(sessionStorageKey.confirmCode);
     const hashInput = await generateHash(codeInput);
 
-    
     if (hashConfirmCode !== hashInput) {
       alert("確認コードが一致しません");
       return;
     }
-    
-    
 
-    const normalizedBadgeList = Array.isArray(badgeList) ? badgeList : [badgeList];
-
-    // セッションに情報を保存
-    sessionStorage.setItem(sessionStorageKey.badgeVcList, JSON.stringify(normalizedBadgeList));
-    sessionStorage.setItem(sessionStorageKey.consumer, JSON.stringify(consumer));
-    sessionStorage.setItem(sessionStorageKey.submissionEmail, submissionEmail || "");
-    sessionStorage.setItem(sessionStorageKey.externalLinkageId, externalLinkageId || "");
-
-    router.push("/submission/confirm/load");
-    
+    // 履歴を上書きして、戻るボタンで認証後の画面に戻らないようにする
+    window.history.replaceState({ isConfirmed: true }, "", router.asPath);
+    setIsConfirmed(true);
   };
 
-  // ハッシュ化
-  async function generateHash(confirmCode: string) {
-    const encoder = new TextEncoder();
-    const encodedCode = encoder.encode(confirmCode.toString());
-    const hashBuffer = await crypto.subtle.digest("SHA-256", encodedCode);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map((byte) => byte.toString(16).padStart(2, "0")).join("");
-
-    return hashHex;
-  }
-
-  // キャンセル時：元の submission 入力ページへ戻す（badge_vc_id を維持）
   const handleCancel = () => {
-    // sessionStorage に再度必要な情報を保存（戻った先で復元できるように）
     const normalizedBadgeList = Array.isArray(badgeList) ? badgeList : [badgeList];
     sessionStorage.setItem(sessionStorageKey.badgeVcList, JSON.stringify(normalizedBadgeList));
     sessionStorage.setItem(sessionStorageKey.consumer, JSON.stringify(consumer));
@@ -90,23 +78,41 @@ const Confirm = ({ consumer, badgeList }: Props) => {
     router.push("/submission");
   };
 
-  // badge_vc_id 不一致なら 404
+  async function generateHash(confirmCode: string) {
+    const encoder = new TextEncoder();
+    const encoded = encoder.encode(confirmCode);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+
   if (badgeVcId && badgeVc.badgeVcId.toString() !== badgeVcId) {
     router.push("/404");
     return null;
   }
 
-  // セッション情報がなければエラー表示
   if (!submissionEmail || !consumer || !badgeVc) {
-    const returnPath = `${pagePath.submission.enter}/${router.query.badge_vc_id}`;
     return (
       <Box>
         <WarningIcon w={8} h={8} color="status.caution" />
         <Text>セッション情報がありません</Text>
-        <SecondaryButton onClick={() => router.push(returnPath)}>
+        <SecondaryButton onClick={() => router.push("/submission")}>
           確認コードを再発行する
         </SecondaryButton>
       </Box>
+    );
+  }
+
+
+  if (isConfirmed) {
+    const normalizedBadgeList = Array.isArray(badgeList) ? badgeList : [badgeList];
+    return (
+      <Load
+        badgeList={normalizedBadgeList}
+        consumer={consumer}
+        submissionEmail={submissionEmail}
+        externalLinkageId={externalLinkageId}
+      />
     );
   }
 
@@ -150,7 +156,12 @@ const Confirm = ({ consumer, badgeList }: Props) => {
 
         <Box w="full">
           <FormLabel mb={2}>確認コードを入力</FormLabel>
-          <Input type="text" maxLength={10} onChange={(e) => setCodeInput(e.target.value)} />
+          <Input
+            type="text"
+            maxLength={10}
+            value={codeInput}
+            onChange={(e) => setCodeInput(e.target.value)}
+          />
         </Box>
 
         <Flex justifyContent="space-between" w="full">
@@ -166,7 +177,6 @@ const Confirm = ({ consumer, badgeList }: Props) => {
   );
 };
 
-// 表示用フィールド
 const Field = ({ label, value }: { label: string; value: string | null }) => (
   <Box w="full" textAlign="left">
     <Text color="gray" mb={1}>{label}</Text>

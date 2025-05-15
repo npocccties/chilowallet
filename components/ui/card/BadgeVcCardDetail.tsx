@@ -44,15 +44,15 @@ import { Grid, GridItem, Image, Text ,
         p={{ base: 3, sm: 6 }}
         backgroundColor={expired && "gray.300"}
       >
-        <GridItem display={"grid"} placeItems={"left"} rowSpan={1} colSpan={1} rowStart={1} colStart={2} p={{ base: 1, sm: 2 }}>
-          <DangerButton w={160} disabled={isDeleteDisabled} onClick={onOpen}>
+        <GridItem display={"grid"} placeItems={"right"} rowSpan={1} colSpan={1} rowStart={1} colStart={2} p={{ base: 1, sm: 2 }}>
+          <DangerButton w={{ base: 20, sm: 160 }} disabled={isDeleteDisabled} onClick={onOpen}>
             削除
           </DangerButton>
         </GridItem>
         <GridItem display={"grid"} placeItems={"left"} rowSpan={1} colSpan={1} rowStart={1} colStart={3} p={{ base: 1, sm: 2 }}>
           <PrimaryButton
             as="a"
-            w={160}
+            w={{ base: 110, sm: 160 }}
             href={`data:image/png;base64,${badgeExportData}`}
             download={`${badgeVc.badgeName}.png`}>
             エクスポート
