@@ -7,9 +7,6 @@ import { useEffect, useState } from "react";
 import { BadgeVcCardDetail } from "@/components/ui/card/LoadBadgeCard";
 import { postSubmissionVc } from "@/share/api/submission/postSubmissionVc";
 
-// デバッグ用
-// let count = 1;
-
 type Badge = {
   id: number;
   name: string;
@@ -66,27 +63,6 @@ const Load = ({ badgeList, consumer, submissionEmail, externalLinkageId }: Props
           externalLinkageId,
         });
 
-        // デバッグ用スリープ処理
-        /*
-        const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-        await sleep(3000);
-        interface Response {
-          result: string;
-          reason_code: number;
-        }
-        let response: Response = { result: "", reason_code: 0 };
-        if (count === 1) {
-          response = { result: "success", reason_code: 0 };
-        } else if (count === 2) {
-          response = { result: "error", reason_code: 101 };
-        } else if (count === 3) {
-          response = { result: "error", reason_code: 103 };
-        } else {
-          response = { result: "error", reason_code: 999 };
-        }
-        count += 1;
-        */
-
         const updated = [...progressData];
         updated[currentIndex].status = response.result === "success" ? "complete" : "error";
 
@@ -133,7 +109,7 @@ const Load = ({ badgeList, consumer, submissionEmail, externalLinkageId }: Props
     }
   }, [currentIndex, progressData, badgeList, consumer, submissionEmail, externalLinkageId]);
 
-  // beforeunload ガード（リロード/タブ閉じ対応）
+  // リロード / タブ・ウィンドウ閉じる / ブラウザバック
   useEffect(() => {
     if (!initialized) return;
 
@@ -143,16 +119,8 @@ const Load = ({ badgeList, consumer, submissionEmail, externalLinkageId }: Props
       );
       if (!hasPending) return;
 
-      const updated = progressData.map((badge) =>
-        badge.status === "importing" ? { ...badge, status: "paused" as const } : badge
-      );
-      setProgressData(updated);
-      sessionStorage.setItem("progressData", JSON.stringify(updated));
-
-      const message = "進行中のバッジ提出があります。ページを離れると、処理が中断されます。";
       event.preventDefault();
-      event.returnValue = message;
-      return message;
+      event.returnValue = "";
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -161,7 +129,7 @@ const Load = ({ badgeList, consumer, submissionEmail, externalLinkageId }: Props
     };
   }, [initialized, progressData]);
 
-  // ページ遷移ガード（戻る・他ページへ）
+  // Next.js の画面遷移
   useEffect(() => {
     if (!initialized) return;
 
@@ -177,25 +145,15 @@ const Load = ({ badgeList, consumer, submissionEmail, externalLinkageId }: Props
     };
 
     const handleRouteChangeStart = () => {
-      const allow = confirmLeave();
-      if (!allow) {
+      if (!confirmLeave()) {
         router.events.emit("routeChangeError");
-        setTimeout(() => {
-          throw new Error("Route change aborted by user.");
-        });
+        throw "Abort route change.";
       }
     };
 
-    const handleBeforePopState = () => {
-      return confirmLeave(); // trueなら遷移許可、falseならキャンセル
-    };
-
     router.events.on("routeChangeStart", handleRouteChangeStart);
-    router.beforePopState(handleBeforePopState);
-
     return () => {
       router.events.off("routeChangeStart", handleRouteChangeStart);
-      router.beforePopState(() => true); // 初期化解除
     };
   }, [initialized, progressData, router]);
 
