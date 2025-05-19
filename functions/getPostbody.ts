@@ -34,7 +34,7 @@ export async function getPostBadgeList(req: GetServerSidePropsContext['req']): P
 
     const postData = JSON.parse(postRaw);
     loggerInfo(`POSTデータ: ${JSON.stringify(postData)}`);
-    const badgeList = postData.badgeList || [];
+    const badgeList = postData.badge_list || [];
 
     let consumerName = "提供者不明";
     if (badgeList[0]?.badge_json_parsed?.issuer?.name) {
