@@ -58,9 +58,12 @@ export const getBadgeListFromMoodle = async ({
 
 export const getVcBadge = async (
   badgeClassId: string,
-  walletId: number,
+  walletId: number | null,
   lmsId: number,
 ) => {
+  if (walletId === null) {
+    return null
+  }
   const [badgeVcs] = await Promise.all([
     prisma.badgeVc.findFirst({
       select: {
@@ -78,15 +81,18 @@ export const getVcBadge = async (
     }),
   ]);
   if (!badgeVcs) {
-    return undefined;
+    return null;
   }
   return badgeVcs;
 };
 
 export const getVcBadges = async (
-  walletId: number,
+  walletId: number | null,
   lmsId: number,
 ) => {
+  if (walletId === null) {
+    return []
+  }
   const [badgeVcs] = await Promise.all([
     prisma.badgeVc.findMany({
       select: {
@@ -106,7 +112,7 @@ export const getVcBadges = async (
     }),
   ]);
   if (!badgeVcs) {
-    return undefined;
+    return [];
   }
   return badgeVcs;
 };
