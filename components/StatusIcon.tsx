@@ -10,7 +10,7 @@ type StatusIconProps = {
   isShowError?: boolean | true 
 };
 
-export const StatusIcon: React.FC<StatusIconProps> = ({ status, reason_code, isShowError }) => {
+export const StatusIcon: React.FC<StatusIconProps> = ({ status, reason_code, isShowError = true }) => {
   let color = "#1e3050"; // importing 用の色
   const code = Number(reason_code);
   console.log("[StatusIcon] reason_code:", reason_code, "→ parsed:", code);

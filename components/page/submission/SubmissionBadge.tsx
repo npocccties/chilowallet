@@ -93,8 +93,6 @@ export const SubmissionBadge = ({ badgeList}: Props) => {
 
     const data = await showProcessingScreen<SendMail>(() => sendConfirmEmail({ email: input.email, consumerId }));
 
-    // ダミーの確認コードを使用（デバッグ用）
-    //const data = { hashConfirmCode: "dummHash" };
     sessionStorage.setItem(sessionStorageKey.confirmCode, data.hashConfirmCode);
     sessionStorage.setItem(sessionStorageKey.submissionEmail, input.email);
     sessionStorage.setItem(sessionStorageKey.externalLinkageId, input.externalLinkageId);

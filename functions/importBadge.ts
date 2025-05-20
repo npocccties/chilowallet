@@ -4,26 +4,40 @@ import { fetchBadgeMetaDataApi } from "@/share/api/badgeMetaData/fetchBadgeMetaD
 import { IfUserBadgeStatus, IfBadgeInfo, ImportingBadgeStatus } from "@/types/BadgeInfo";
 
 export async function getIfBadgeInfoSSO(userBadges: IfUserBadgeStatus[]): Promise<ImportingBadgeStatus[]> {
+  // IfBadgeInfoのIDと、それを取得したLMSのURLを保持し、badge_class_idと比較する。
+  type myBadgePeer = {
+    iBInfo: IfBadgeInfo;
+    lmsUrl: string;
+  }
+  
   const importingBadgeList: ImportingBadgeStatus[] = [];
-  const gotLMS = new Set<string>();
-  const myBadges: IfBadgeInfo[] = []
+  const gotLmsId = new Set<number>();
+  const myBadges: myBadgePeer[] = []
+  const addedBadgeIds = new Set<string>(); // 追加したバッジ情報の重複を、IDで判定して排除
 
   for (const b of userBadges) {
     // 既に取得したLMSはスキップ
-    if (b.lms_id in gotLMS) {
+    if (gotLmsId.has(b.lms_id) === true) {
       continue
     }
     // [NOTE] SSOの場合、POSTに必要なパラメータはlmsIdのみ。
+    // ポータルダッシュボードからPOSTされるのはLMS(SSO)由来の想定。
     const myB = await fetchBadgeListApi({lmsId: b.lms_id})
-    myBadges.push(...myB.badgeList);
-    gotLMS.add(b.lms_url)
+    for (const x of myB.badgeList) {
+      myBadges.push({iBInfo: x, lmsUrl: b.lms_url});
+    }
+    gotLmsId.add(b.lms_id)
   }
   
   // [NOTE] badge_class_idとgetMyBadgesのidは等価。
   for (const userB of userBadges) {
     for (const myB of myBadges) {
-      if (isMatchedBadgeClassId(userB.badge_class_id, myB.id)) {
-        importingBadgeList.push({...userB, ...myB});
+      if (isMatchedBadgeClassId(userB.badge_class_id, myB.lmsUrl, myB.iBInfo.id)) {
+        // すでに追加したバッジ情報でなければ、追加する。(重複排除)
+        if (addedBadgeIds.has(userB.badge_class_id) === false) {
+          importingBadgeList.push({...userB, ...myB.iBInfo});
+          addedBadgeIds.add(userB.badge_class_id);
+        }
       }
     }
   }
@@ -33,19 +47,8 @@ export async function getIfBadgeInfoSSO(userBadges: IfUserBadgeStatus[]): Promis
 
 // POSTデータのbadge_class_id...https://dev-lms.oku.cccties.org/badges/badge_json.php?id=17
 // LMSから取得したID...(number)
-function isMatchedBadgeClassId(badgeClassId: string, id: number): boolean {
-  // badge_class_idの形式を正規表現で抽出
-  const regex = /id=(\d+)/; 
-  const match = badgeClassId.match(regex);  // badge_class_idからidを抽出
-  try {
-    if (match) {  // idが抽出できた場合
-      const extractedId = parseInt(match[1], 10);  // idを数値に変換
-      return extractedId === id;  // idが一致するか比較
-    }
-  } catch (e) {
-    console.error("Error parsing badge_class_id:", e);  // エラーログを出力
-  }
-  return false
+function isMatchedBadgeClassId(badgeClassId: string, lms_url: string, id: number): boolean {
+  return (badgeClassId === `${lms_url}/badges/badge_json.php?id=${id}`)
 }
 
 export function parseBadgeJson(badgeJson: string): any {
