@@ -36,12 +36,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     const protocol = req.headers["x-forwarded-proto"] || "http"; // HTTP or HTTPS
     const fqdn = `${protocol}://${host}`;
     let response: BadgeStatusListResponse = { user_badgestatuslist: { lms_badge_count: 0, lms_badge_list: [], badge_detail_base_url: `${fqdn}/credential/detail`, error_code: ""}};
+    let errorCodes: string[] = [];
+    
     try {
       // [NOTE] getWalledId()は、当該エントリが無い場合、例外をスロー
       walletId = await getWalletId(eppn);
     } catch (e) {
-      loggerInfo(`Not found wallet. eppn: ${eppn}`);
-      walletId = null
+      loggerInfo(`${errors.E20001}: Not found wallet. eppn: ${eppn}`);
+      errorCodes.push(errors.E20001);
+      walletId = null;
     }
 
     loggerDebug(`walletId: ${walletId}`);
@@ -53,7 +56,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
     }
     loggerDebug(`lmsList: ${JSON.stringify(lmsList)}`);
 
-    let errorCodes: string[] = [];
     let lms_badge_list: IfUserBadgeStatus[] = [];
     let badgeClassIds = new Set<string>();
     let badgeVcIds = new Set<number>();
@@ -77,6 +79,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<BadgeStatusList
       loggerDebug(`lms: ${JSON.stringify(lms)}`);
       try {
         courseList = await getCourseListFromMoodle({ username: eppn, lmsId });
+        // [NOTE] トークン取得失敗の場合は、nullを返却。
+        // そうでないエラーは関数内で例外がスローされる。
+        if (courseList === null) {
+          continue
+        } 
       } catch (e) {
         if (e.message.indexOf("getUserByUsername") != -1) {
           errorCodes.push(errors.E10000);

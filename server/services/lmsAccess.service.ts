@@ -171,7 +171,13 @@ const getUserByUsername = async (token: string, selectLms: LmsList, username: st
 
 export const myCoursesList = async (username: string, selectLms: LmsList): Promise<IfCourseInfo[]> => {
   try {
-    let token = await getMyTokenAdmin(username, selectLms);
+    const token = await getMyTokenAdmin(username, selectLms);
+    if (!(typeof token === 'string')) {
+      loggerInfo(`${username} failed to get token from ${selectLms.lmsUrl} server/service/lmsAccess.service myCoursesList`)
+      // [NOTE] エラーとしてカウントする場合、例外を以下でスロー
+      // throw new Error("getUserByUsername");
+      return null
+    }
     const userInfos: IfUserInfo[] = await getUserByUsername(token, selectLms, username);
     if (userInfos.length == 0) {
       throw new Error(`Not found user. ${username}`);
