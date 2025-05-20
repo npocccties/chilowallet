@@ -17,6 +17,7 @@ import { restorePostedDataInSessionStorage } from "@/functions/storePostedBadgeL
 import { loggerError, loggerInfo } from "@/lib/logger";
 import { getUserInfoFormJwt } from "@/lib/userInfo";
 import { findAllSafeLmsList } from "@/server/repository/lmsList";
+import { createWallet } from "@/server/repository/wallet";
 import { getWalletId } from "@/server/services/wallet.service";
 import { BadgeMetaData } from "@/types/badgeInfo/metaData";
 import { SafeLmsList } from "@/types/lms";
@@ -36,13 +37,27 @@ export const getServerSideProps: GetServerSideProps = async ({ req }): Promise<G
   const { eppn } = getUserInfoFormJwt(session_cookie);
   let isFoundWallet = false
   try {
-    const id = await getWalletId(eppn);
+    const id = await getWalletId(eppn);    
     if (id) {
       isFoundWallet = true
     }
     loggerInfo(`Found walletId: ${id}`);
   } catch (e) {
     loggerInfo(`Not found walletId`);
+  }
+
+  // ウォレットが無い場合、自動的に作成する
+  if (!isFoundWallet) {
+    try {
+      await createWallet(eppn)
+      const id = await getWalletId(eppn);    
+      if (id) {
+        isFoundWallet = true
+      }
+      loggerInfo(`Found walletId: ${id}`);
+    } catch (e) {
+      loggerError("Failed to create wallet")
+    }
   }
 
   try {
@@ -80,8 +95,8 @@ const ImportVCPage = (props: Props) => {
     );
     console.debug("restoredList", restoredList);
     if (isFoundWallet === false) {
-      console.info("Go to create wallet page");
-      router.push(pagePath.entry);
+      console.info("Go to error page");
+      router.push(pagePath.login.error);
     } else {
       // インポート対象バッジがある場合、インポートページへ
       setIsBadgeSelect(restoredList.length > 0);
