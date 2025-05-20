@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, Fragment, useId } from "react";
 
-import { logoLink, dashboardLink, learningLink, issuerInfos, footerInfos } from "./urls";
+import { logoTitle, logoLink, dashboardTitle, dashboardLink, learningTitle, learningLink, issuerTitle, issuerInfos, footerInfos } from "./urls";
 
 type Props = {
   open: boolean;
@@ -68,7 +68,7 @@ function Menu({ open, onClose }: Props) {
                     className="jumpu-text-button font-bold w-full text-gray-700 hover:bg-gray-100"
                     href={logoLink}
                   >
-                    ホーム
+                    {logoTitle}
                   </Link>
                 </li>
                 <li>
@@ -76,7 +76,7 @@ function Menu({ open, onClose }: Props) {
                     className="jumpu-text-button font-bold w-full text-gray-700 hover:bg-gray-100"
                     href={dashboardLink}
                   >
-                    ダッシュボード
+                    {dashboardTitle}
                   </Link>
                 </li>
                 <li>
@@ -84,11 +84,11 @@ function Menu({ open, onClose }: Props) {
                     className="jumpu-text-button font-bold w-full text-gray-700 hover:bg-gray-100"
                     href={learningLink}
                   >
-                    学びを探す
+                    {learningTitle}
                   </Link>
                 </li>
                 <p className={`text-gray-400 font-bold space-y-5`}>
-                  発行元
+                  {issuerTitle}
                 </p>
                 <li>
                   <ul className={`pl-4 mb-3 space-y-5`}>

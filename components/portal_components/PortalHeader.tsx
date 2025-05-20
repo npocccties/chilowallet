@@ -9,7 +9,7 @@ import { MdLogout } from "react-icons/md";
 //import PopoverFlex from "@/components/portal_components/PopoverFlex"
 
 import Menu from "./Menu";
-import { logoLink, dashboardLink, learningLink, issuerInfos } from "./urls";
+import { logoLink, dashboardTitle, dashboardLink, learningTitle, learningLink, issuerTitle, issuerInfos } from "./urls";
 import useDialog from "./use-dialog";
 
 import Popover from "@/components/portal_components/Popover"
@@ -92,7 +92,7 @@ export const PortalHeader: React.FC<Props> = ({ showContents }) => {
                   href={dashboardLink}
                   className="hidden md:inline-flex jumpu-text-button text-white text-sm hover:bg-gray-700 items-center gap-2 whitespace-nowrap"
               >
-                ダッシュボード
+                {dashboardTitle}
               </Link>
             </Flex>
             <Flex gap={flexMenuItemInnerGap} alignItems={"center"} color={"basic.white"} display={{ base: "none", md: "flex" }} >
@@ -101,7 +101,7 @@ export const PortalHeader: React.FC<Props> = ({ showContents }) => {
                   href={learningLink}
                   className="hidden lg:inline-flex jumpu-text-button text-white text-sm hover:bg-gray-700 items-center gap-2 whitespace-nowrap"
                   >
-                  学びを探す
+                  {learningTitle}
               </Link>
             </Flex>
             <Flex gap={flexMenuItemInnerGap} alignItems={"center"} color={"basic.white"} display={{ base: "none", md: "flex" }}>
@@ -110,7 +110,7 @@ export const PortalHeader: React.FC<Props> = ({ showContents }) => {
               title={
                 <>
                 <Issuer className="fill-white size-[1.125rem]" alt="" />
-                <span>発行元</span>
+                <span>{issuerTitle}</span>
                 </>
               }
               >
