@@ -26,7 +26,7 @@ export const Layout: React.VFC<LayoutProps> = ({ children, maxW, textAlign, alig
       overflow={"visible"}
       >
       <PortalHeader showContents={showHeaderContents}/>
-      <Box ml="-50%" mt="5">
+      <Box ml="-50%" mt="5" mb="-10">
         <ReturnButton 
           as="a"
           href={returnTo} 

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 const fallbackBackUrl = process.env.NEXT_PUBLIC_BACK_URL as string;
 const STORAGE_KEY = "back_url";
+const EXCEPTION_PATHS = ["/credential/detail"]
 
 export const useBackUrl = (): string => {
   const router = useRouter();
@@ -10,6 +11,18 @@ export const useBackUrl = (): string => {
   const [storedUrl, setStoredUrl] = useState<string | null>(null);
 
   useEffect(() => {
+    // Rèy[WŁAback_url ªw肳ê¢Ȃ¢ꍇAsessionStorage ©ç
+    if (!raw) {
+      for (const ep of EXCEPTION_PATHS) {
+        if (router.pathname.includes(ep)) {
+          console.debug("not use back_url page")
+          sessionStorage.removeItem(STORAGE_KEY);
+          setStoredUrl(null);
+          return;
+        }
+      }
+    }
+    console.debug("use back_url page")
     if (raw && !Array.isArray(raw)) {
       try {
         const decoded = decodeURIComponent(raw);

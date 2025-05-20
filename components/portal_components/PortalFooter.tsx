@@ -11,7 +11,6 @@ type Props = {
 
 function PortalFooter({ className }: Props) {
   const id = useId();
-  console.log(footerInfos)
   return (
     <footer
       className={clsx("bg-black mt-4 lg:pb-10 pt-12 pb-32 md:py-8", className)}

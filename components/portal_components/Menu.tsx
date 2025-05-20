@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, Fragment, useId } from "react";
 
-import { logoLink, dashboardLink, learningLink, issuerInfos, footerInfos } from "./urls";
+import { logoTitle, logoLink, dashboardTitle, dashboardLink, learningTitle, learningLink, issuerTitle, issuerInfos, footerInfos } from "./urls";
 
 type Props = {
   open: boolean;
@@ -62,13 +62,13 @@ function Menu({ open, onClose }: Props) {
                   <Icon className="text-xl text-black" icon="fa6-solid:xmark" />
                 </button>
               </div>
-              <ul className="mb-12 space-y-1">
+              <ul className={`mb-12 space-y-7`}>
                 <li>
                   <Link
                     className="jumpu-text-button font-bold w-full text-gray-700 hover:bg-gray-100"
                     href={logoLink}
                   >
-                    ホーム
+                    {logoTitle}
                   </Link>
                 </li>
                 <li>
@@ -76,7 +76,7 @@ function Menu({ open, onClose }: Props) {
                     className="jumpu-text-button font-bold w-full text-gray-700 hover:bg-gray-100"
                     href={dashboardLink}
                   >
-                    ダッシュボード
+                    {dashboardTitle}
                   </Link>
                 </li>
                 <li>
@@ -84,14 +84,14 @@ function Menu({ open, onClose }: Props) {
                     className="jumpu-text-button font-bold w-full text-gray-700 hover:bg-gray-100"
                     href={learningLink}
                   >
-                    学びを探す
+                    {learningTitle}
                   </Link>
                 </li>
+                <p className={`text-gray-400 font-bold space-y-5`}>
+                  {issuerTitle}
+                </p>
                 <li>
-                  <p className="text-gray-400 font-bold px-[1.25em] py-[0.75em]">
-                    発行元
-                  </p>
-                  <ul className="pl-4 mb-3 space-y-1">
+                  <ul className={`pl-4 mb-3 space-y-5`}>
                     {issuers.map((issuer, index) => (
                         <li key={index} role="menuitem">
                           <Link
@@ -106,7 +106,7 @@ function Menu({ open, onClose }: Props) {
                   </ul>
                 </li>
               </ul>
-              <ul className="space-y-1">
+              <ul className={`space-y-7`}>
                 {footerInfos.map((content) => (
                   <li key={id}>
                     <Link
@@ -118,7 +118,6 @@ function Menu({ open, onClose }: Props) {
                   </li>
                 ))}
               </ul>
-              
             </DialogPanel>
           </div>
         </TransitionChild>
