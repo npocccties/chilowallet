@@ -171,10 +171,7 @@ const Load = ({ badgeList, consumer, submissionEmail, externalLinkageId }: Props
             const description = parsedJson?.description;
             const imageUrl = parsedJson?.image?.id || "";
 
-            badgeName =
-              parsedJson?.alignments?.[1]?.targetName ||
-              parsedJson?.name ||
-              badgeVc.badgeName;
+            badgeName = badgeVc.badge_name;
 
             badgeVc = {
               ...badgeVc,
@@ -210,4 +207,3 @@ const Load = ({ badgeList, consumer, submissionEmail, externalLinkageId }: Props
 };
 
 export default Load;
-

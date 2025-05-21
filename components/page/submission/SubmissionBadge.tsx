@@ -125,21 +125,9 @@ export const SubmissionBadge = ({ badgeList, badgeConsumers }: Props) => {
         <Text mb={2}>{badgeList.length} 件のバッジを選択中</Text>
         <VStack align="start" spacing={1}>
           {badgeList.map((badge, idx) => {
-            let parsedBadgeJson: any = {};
-            try {
-              // eslint-disable-next-line no-control-regex
-              const cleanedJson = badge.badge_json.replace(/[\u0000-\u001F]+/g, "");
-              parsedBadgeJson = JSON.parse(cleanedJson);
-            } catch (e) {
-              console.warn("badge_json のパースに失敗しました:", e);
-            }
-
-            const alignments = parsedBadgeJson?.alignments || [];
-            const target = alignments[1]; // 2番目の targetName を取得
-
             return (
               <Box key={idx}>
-                {target && <Text>・{target.targetName}</Text>}
+                <Text>・{badge.badge_name}</Text>
               </Box>
             );
           })}

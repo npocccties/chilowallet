@@ -23,7 +23,7 @@ type ConsumerData = {
 
 type BadgeVcData = {
   badgeVcId: number;
-  badgeName: string;
+  badge_name: string;
   badgeIssuedon: string;
   vcImage: string;
   badge_json?: string;
@@ -127,24 +127,12 @@ const Confirm = ({ consumer, badgeList }: Props) => {
         {Array.isArray(badgeList) ? badgeList.length : 1} 件のバッジを選択中
       </Text>
       <VStack align="start" spacing={1}>
-        {(Array.isArray(badgeList) ? badgeList : [badgeList]).map((badge, idx) => {
-          let targetName = badge.badgeName;
-          try {
-            // eslint-disable-next-line no-control-regex
-            const cleanedJson = badge.badge_json?.replace(/[\u0000-\u001F]+/g, "");
-            const parsed = cleanedJson ? JSON.parse(cleanedJson) : null;
-            const alignments = parsed?.alignments || [];
-            targetName = alignments[1]?.targetName || badge.badgeName;
-          } catch (e) {
-            console.warn("badge_json のパースに失敗:", e);
-          }
+        {(Array.isArray(badgeList) ? badgeList : [badgeList]).map((badge, idx) => (
+          <Box key={idx}>
+            <Text>・{badge.badge_name}</Text>
+          </Box>
+        ))}
 
-          return (
-            <Box key={idx}>
-              <Text>・{targetName}</Text>
-            </Box>
-          );
-        })}
       </VStack>
 
       <Divider mt={4} />
