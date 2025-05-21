@@ -11,7 +11,6 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import { badgeConsumerTestData } from "prisma/testdata/badge_consumers";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
@@ -21,8 +20,6 @@ import { sendEmailFormSchema } from "@/lib/validation";
 import { sendConfirmEmail } from "@/share/api/submission/sendConfirmEmail";
 import { processingScreenActions } from "@/share/store/ui/processingScreen/man";
 import { SendMail } from "@/types/api/submission";
-
-// badgeConsumerTestData をインポート
 
 type InputForm = {
   consumerId: number | string;
@@ -54,9 +51,10 @@ type BadgeVcData = {
 type Props = {
   badgeList: BadgeVcData[];
   consumer: ConsumerData;
+  badgeConsumers: ConsumerData[];
 };
 
-export const SubmissionBadge = ({ badgeList}: Props) => {
+export const SubmissionBadge = ({ badgeList, badgeConsumers }: Props) => {
   const router = useRouter();
   const { showProcessingScreen } = processingScreenActions.useShowProcessingScreen(); // 処理中画面表示
 
@@ -85,7 +83,7 @@ export const SubmissionBadge = ({ badgeList}: Props) => {
     }
 
     const consumerId = typeof input.consumerId === "string" ? Number(input.consumerId) : input.consumerId;
-    const selectedConsumer = badgeConsumerTestData.find((c) => c.consumerId === consumerId);
+    const selectedConsumer = badgeConsumers.find((c) => c.consumerId === consumerId);
     if (!selectedConsumer) {
       alert("無効な提出先が選択されています。");
       return;
@@ -157,7 +155,7 @@ export const SubmissionBadge = ({ badgeList}: Props) => {
               <option value="" disabled hidden>
                 選択してください
               </option>
-              {badgeConsumerTestData.map((c) => (
+              {badgeConsumers.map((c) => (
                 <option key={c.consumerId} value={c.consumerId}>
                   {c.consumerName}
                 </option>
