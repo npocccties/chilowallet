@@ -4,8 +4,7 @@ export const badgeConsumerTestData: BadgeConsumer[] = [
   {
     consumerId: 1,
     consumerName: "大阪市",
-    //cabinetUrl: "https://xxx.com",
-    cabinetUrl: "http://localhost:3001",
+    cabinetUrl: "https://xxx.com",
   },
   {
     consumerId: 2,
