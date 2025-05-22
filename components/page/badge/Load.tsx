@@ -1,4 +1,4 @@
-// components/page/submission/Load.tsx
+// components/page/badge/Load.tsx
 
 import { Text, Box, VStack } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
@@ -9,9 +9,6 @@ import { importBadgeConvertToVc } from "@/share/api/badgeImport/importBadgeConve
 import { fetchBadgeMetaDataApi } from "@/share/api/badgeMetaData/fetchBadgeMetaDataApi";
 import { ImportingBadgeStatus } from "@/types/BadgeInfo";
 import { BadgeMetaData } from "@/types/badgeInfo/metaData";
-
-// デバッグ用
-//let count = 1;
 
 type Badge = {
   id: number;

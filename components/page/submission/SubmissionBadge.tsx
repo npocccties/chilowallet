@@ -11,7 +11,6 @@ import {
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import { badgeConsumerTestData } from "prisma/testdata/badge_consumers";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
@@ -21,8 +20,6 @@ import { sendEmailFormSchema } from "@/lib/validation";
 import { sendConfirmEmail } from "@/share/api/submission/sendConfirmEmail";
 import { processingScreenActions } from "@/share/store/ui/processingScreen/man";
 import { SendMail } from "@/types/api/submission";
-
-// badgeConsumerTestData をインポート
 
 type InputForm = {
   consumerId: number | string;
@@ -54,9 +51,10 @@ type BadgeVcData = {
 type Props = {
   badgeList: BadgeVcData[];
   consumer: ConsumerData;
+  badgeConsumers: ConsumerData[];
 };
 
-export const SubmissionBadge = ({ badgeList}: Props) => {
+export const SubmissionBadge = ({ badgeList, badgeConsumers }: Props) => {
   const router = useRouter();
   const { showProcessingScreen } = processingScreenActions.useShowProcessingScreen(); // 処理中画面表示
 
@@ -85,7 +83,7 @@ export const SubmissionBadge = ({ badgeList}: Props) => {
     }
 
     const consumerId = typeof input.consumerId === "string" ? Number(input.consumerId) : input.consumerId;
-    const selectedConsumer = badgeConsumerTestData.find((c) => c.consumerId === consumerId);
+    const selectedConsumer = badgeConsumers.find((c) => c.consumerId === consumerId);
     if (!selectedConsumer) {
       alert("無効な提出先が選択されています。");
       return;
@@ -127,21 +125,9 @@ export const SubmissionBadge = ({ badgeList}: Props) => {
         <Text mb={2}>{badgeList.length} 件のバッジを選択中</Text>
         <VStack align="start" spacing={1}>
           {badgeList.map((badge, idx) => {
-            let parsedBadgeJson: any = {};
-            try {
-              // eslint-disable-next-line no-control-regex
-              const cleanedJson = badge.badge_json.replace(/[\u0000-\u001F]+/g, "");
-              parsedBadgeJson = JSON.parse(cleanedJson);
-            } catch (e) {
-              console.warn("badge_json のパースに失敗しました:", e);
-            }
-
-            const alignments = parsedBadgeJson?.alignments || [];
-            const target = alignments[1]; // 2番目の targetName を取得
-
             return (
               <Box key={idx}>
-                {target && <Text>・{target.targetName}</Text>}
+                <Text>・{badge.badge_name}</Text>
               </Box>
             );
           })}
@@ -157,7 +143,7 @@ export const SubmissionBadge = ({ badgeList}: Props) => {
               <option value="" disabled hidden>
                 選択してください
               </option>
-              {badgeConsumerTestData.map((c) => (
+              {badgeConsumers.map((c) => (
                 <option key={c.consumerId} value={c.consumerId}>
                   {c.consumerName}
                 </option>

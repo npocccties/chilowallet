@@ -8,7 +8,7 @@ import { SubmissionBadge } from "@/components/page/submission/SubmissionBadge";
 import { PageTitle } from "@/components/ui/text/PageTitle";
 import { SERVICE_NAME, SERVICE_DESCRITION } from "@/configs";
 import { pageName, sessionStorageKey } from "@/constants";
-
+import { submissionBadge } from "@/server/repository/submissionBadge";
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
@@ -29,6 +29,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         props: {
           badgeList: [],
           consumer: null,
+          badgeConsumers: [],
           error: "バッジデータが見つかりませんでした。",
         },
       };
@@ -57,6 +58,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       consumerName = badgeList[0].badge_json_parsed.issuer.name;
     }
 
+    // バッジIDを使って提出先リストを取得
+    const { badgeConsumers } = await submissionBadge({ badgeVcId: badgeList[0].badgeVcId });
+
     return {
       props: {
         badgeList,
@@ -64,24 +68,27 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           consumerId: 999,
           consumerName,
         },
+        badgeConsumers,
         error: null,
       },
     };
   }
 
-  // GETアクセスの場合はクライアント側で sessionStorage を参照
+  // GETアクセス時（セッションから復元する）
   return {
     props: {
       badgeList: null,
       consumer: null,
+      badgeConsumers: null,
       error: null,
     },
   };
 };
 
-const SubmissionEnterPage = ({ badgeList, consumer, error }) => {
+const SubmissionEnterPage = ({ badgeList, consumer, badgeConsumers, error }) => {
   const [localBadgeList, setLocalBadgeList] = useState([]);
   const [localConsumer, setLocalConsumer] = useState(null);
+  const [localBadgeConsumers, setLocalBadgeConsumers] = useState([]);
   const [localError, setLocalError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -91,15 +98,17 @@ const SubmissionEnterPage = ({ badgeList, consumer, error }) => {
       return;
     }
 
-    // POST経由で来たデータがあればそれを使う
-    if (badgeList && consumer) {
+    // POST経由で来たデータがあればそのまま使う
+    if (badgeList && consumer && badgeConsumers) {
       setLocalBadgeList(badgeList);
       setLocalConsumer(consumer);
+      setLocalBadgeConsumers(badgeConsumers);
       setReady(true);
-      
+
       try {
         sessionStorage.setItem(sessionStorageKey.badgeVcList, JSON.stringify(badgeList));
         sessionStorage.setItem(sessionStorageKey.consumer, JSON.stringify(consumer));
+        sessionStorage.setItem(sessionStorageKey.badgeConsumers, JSON.stringify(badgeConsumers));
       } catch (e) {
         console.warn("セッション情報の保存に失敗:", e);
       }
@@ -107,14 +116,16 @@ const SubmissionEnterPage = ({ badgeList, consumer, error }) => {
       return;
     }
 
-    // GETアクセスで sessionStorage から復元
+    // GETアクセス時は sessionStorage から復元する
     const savedBadgeList = sessionStorage.getItem(sessionStorageKey.badgeVcList);
     const savedConsumer = sessionStorage.getItem(sessionStorageKey.consumer);
+    const savedConsumers = sessionStorage.getItem(sessionStorageKey.badgeConsumers);
 
-    if (savedBadgeList && savedConsumer) {
+    if (savedBadgeList && savedConsumer && savedConsumers) {
       try {
         setLocalBadgeList(JSON.parse(savedBadgeList));
         setLocalConsumer(JSON.parse(savedConsumer));
+        setLocalBadgeConsumers(JSON.parse(savedConsumers));
         setReady(true);
       } catch (e) {
         setLocalError("セッション情報の復元に失敗しました。");
@@ -122,7 +133,7 @@ const SubmissionEnterPage = ({ badgeList, consumer, error }) => {
     } else {
       setLocalError("不正なアクセスです。情報が見つかりません。");
     }
-  }, [badgeList, consumer, error]);
+  }, [badgeList, consumer, badgeConsumers, error]);
 
   if (localError) {
     return (
@@ -140,7 +151,12 @@ const SubmissionEnterPage = ({ badgeList, consumer, error }) => {
     <Layout align="center" textAlign="center" maxW="md">
       <Metatag title={SERVICE_NAME} description={SERVICE_DESCRITION} />
       <PageTitle title={pageName.submission} />
-      <SubmissionBadge badgeList={localBadgeList} consumer={localConsumer} />
+      {/* badgeConsumers を渡す */}
+      <SubmissionBadge
+        badgeList={localBadgeList}
+        consumer={localConsumer}
+        badgeConsumers={localBadgeConsumers}
+      />
     </Layout>
   );
 };
