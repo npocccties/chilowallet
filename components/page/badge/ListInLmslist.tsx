@@ -80,13 +80,17 @@ export const BadgeList = ({
 
     try {
       await fetchBadgeList({ lmsId });
+    } catch(e) {
+      console.error(`Failed to get badgeList from lmsId: ${lmsId}`);
+      clearBadgeList();
+      clearBadgeMetaDataList();
     } finally {
       setIsLoading(false);
     }
   };
-  const handleBadgeSelect = (badgeList: IfBadgeInfo[]) => {
-    console.log("handleBadgeSelect", badgeList);
-    if (badgeMetaDataList.length === 0) 
+  const handleBadgeSelect = (badgeList: IfBadgeInfo[], badgeMetaDataList: BadgeMetaData[]) => {
+    console.debug("handleBadgeSelect", badgeList, badgeMetaDataList);
+    if (badgeList.length === 0 || badgeMetaDataList.length === 0) 
       return;
 
     const importBadges = badgeList.map((badge) => {
@@ -206,7 +210,7 @@ export const BadgeList = ({
                 badgeList.length !== 0 ? (
                 <>
                     <Box m={4}>
-                    <AcquireAllButton onClick={() => handleBadgeSelect(badgeList)}/>
+                    <AcquireAllButton onClick={() => handleBadgeSelect(badgeList, badgeMetaDataList)}/>
                     </Box>
                     {badgeList.map((badge, idx) => {
                         console.debug("badgeMetaDataList[idx]", badgeMetaDataList[idx]);
@@ -218,7 +222,7 @@ export const BadgeList = ({
                                 badgeName={badge.name}
                                 description={badge.description}
                                 // 選択したバッジをインポート対象として渡す
-                                setIsBadgeSelect={() => handleBadgeSelect([badge])}
+                                setIsBadgeSelect={() => handleBadgeSelect([badge], [badgeMetaDataList[idx]])}
                             />
                             </Box>
                         )

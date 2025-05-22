@@ -1,6 +1,6 @@
 // components/page/submission/Load.tsx
 
-import { Box, VStack } from "@chakra-ui/react";
+import { Text, Box, VStack } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 import { LoadBadgeCard } from "@/components/ui/card/LoadBadgeCard";
@@ -135,6 +135,7 @@ export const Load = ({ badgeList, metaDataList }: Props) => {
 
   return (
     <Box p={6}>
+      <Text mb={4} fontSize={{base: "xs", sm: "md"}}>バッジインポート中は戻らないようお願いします。</Text>
       <VStack align="start" spacing={4}>
         {progressData.map((badge, idx) => {
           let iBadge = badgeList[idx];
