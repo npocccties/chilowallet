@@ -11,7 +11,7 @@ export const useBackUrl = (): string => {
   const [storedUrl, setStoredUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    // Rèy[WŁAback_url ªw肳ê¢Ȃ¢ꍇAsessionStorage ©ç
+    // back_urlを指定されないページにおいて、他のページで指定された情報を参照しないよう、削除する。
     if (!raw) {
       for (const ep of EXCEPTION_PATHS) {
         if (router.pathname.includes(ep)) {
