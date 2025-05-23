@@ -1,7 +1,6 @@
 import {
   Box
 } from "@chakra-ui/react";
-import { useRouter } from "next/router";
 import React from "react";
 
 import { BadgeVcCardDetail } from "@/components/ui/card/BadgeVcCardDetail";
@@ -17,7 +16,6 @@ export const CredentialDetail: React.FC<CredentialDetailData> = ({
   submissionsHistories,
   badgeExportData,
 }) => {
-  const router = useRouter();
   // const cancelRef = useRef();
   const expired = isBefoerCurrentTimeJST(vcDetailData.badgeExpires);
   // const isDeleteDisabled = vcDetailData.submissions.length !== 0;
@@ -32,7 +30,10 @@ export const CredentialDetail: React.FC<CredentialDetailData> = ({
       // 削除後、戻る先は「戻る」ボタンと同じ
       const backUrl = sessionStorage.getItem("back_url") || process.env.NEXT_PUBLIC_BACK_URL;
       console.debug(`backUrl: ${backUrl}`);
-      router.push(backUrl);
+      // ページ遷移時の警告抑制のため、イベントを解除
+      window.onbeforeunload = null;
+      window.removeEventListener('beforeunload', () => {})
+      window.location.href = backUrl;
     });
   };
   return (
