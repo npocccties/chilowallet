@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { msEntraRetryConfig } from "@/configs/retry";
-import { loggerDebug } from "@/lib/logger";
+import { loggerDebug, loggerInfo } from "@/lib/logger";
 import { retryRequest } from "@/lib/retryRequest";
 import { KeyPair, Signer } from "@/lib/signer";
 import { AcquiredIdToken, VCRequest } from "@/types";
@@ -45,6 +45,7 @@ export const issue = async (
     });
   }, msEntraRetryConfig);
 
+  loggerInfo(`issue response ${issueResponse}`);
   const vc = issueResponse.data.vc;
 
   await axios.post(vcRequest.redirect_uri ? vcRequest.redirect_uri : vcRequest.client_id, {

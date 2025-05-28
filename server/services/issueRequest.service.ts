@@ -1,6 +1,6 @@
 import { msEntraRetryConfig } from "@/configs/retry";
 import { logStatus } from "@/constants/log";
-import { loggerDebug, loggerError } from "@/lib/logger";
+import { loggerDebug, loggerError, loggerInfo } from "@/lib/logger";
 import { retryRequest } from "@/lib/retryRequest";
 import issuanceConfig from "@/templates/issuance_request_config.json";
 
@@ -94,7 +94,7 @@ export const issueRequest = async (
     },
   };
 
-  loggerDebug("issueReqest fetchOptions", fetchOptions);
+  loggerDebug("issueRequest fetchOptions", fetchOptions);
 
   const client_api_request_endpoint =
     "https://verifiedid.did.msidentity.com/v1.0/verifiablecredentials/createIssuanceRequest";
@@ -104,7 +104,8 @@ export const issueRequest = async (
       return fetch(client_api_request_endpoint, fetchOptions);
     }, msEntraRetryConfig);
     const resp = await response.json();
-
+    loggerInfo(`issueRequest response: ${JSON.stringify(resp)}`);
+    
     if (resp.error) {
       throw new Error(resp.error);
     }
