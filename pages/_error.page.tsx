@@ -1,23 +1,19 @@
 import { WarningIcon } from "@chakra-ui/icons";
 import { Box, HStack, Text, VStack } from "@chakra-ui/react";
 import { NextPageContext } from "next";
-import { useRouter } from "next/router";
 
 import { Layout } from "@/components/Layout";
 import { Metatag } from "@/components/Metatag";
-import { SecondaryButton } from "@/components/ui/button/SecondaryButton";
 import { SERVICE_DESCRITION, SERVICE_NAME } from "@/configs";
-import { pagePath } from "@/constants";
 import { errors } from "@/constants/error";
 
 function ErrorPage({ statusCode, errorMessage }) {
-  const router = useRouter();
+  //const router = useRouter();
   const errorLabel = statusCode === 500 ? errors.response500.label : `${statusCode} Not Found`;
-
-  const handleBack = () => {
-    router.push(pagePath.credential.list);
-  };
-
+  
+  //const handleBack = () => {
+  //  router.push(pagePath.credential.list);
+  //};
   return (
     <Layout maxW="2xl" showHeaderContents={false}>
       <Metatag title={SERVICE_NAME} description={SERVICE_DESCRITION} />
@@ -28,7 +24,7 @@ function ErrorPage({ statusCode, errorMessage }) {
 
         <HStack>
           <Box>
-            <SecondaryButton onClick={handleBack}>マイウォレットに戻る</SecondaryButton>
+            {/*<SecondaryButton onClick={handleBack}>マイウォレットに戻る</SecondaryButton>*/}
           </Box>
         </HStack>
       </VStack>

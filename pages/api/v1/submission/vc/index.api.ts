@@ -26,7 +26,7 @@ const querySchema = z.object({
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<{ result: SubmissionResponseStatus } | ErrorResponse>,
+  res: NextApiResponse<{ result: SubmissionResponseStatus, reason_code: number } | ErrorResponse>,
 ) {
   loggerInfo(logStartForApi(apiPath));
   loggerInfo("request body", req.body);
@@ -48,7 +48,7 @@ export default async function handler(
     const resData = await sendCabinetForVc({ badgeVcId, consumerId, walletId, email, externalLinkageId });
     loggerInfo(`${logStatus.success} ${apiPath}`, resData);
 
-    return res.status(200).json({ result: resData });
+    return res.status(200).json({ result: resData.reason_msg, reason_code: resData.reason_code});
   } catch (e) {
     loggerError(`${logStatus.error} ${apiPath}`, e.message);
 

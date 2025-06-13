@@ -11,7 +11,7 @@ import { logStatus } from "@/constants/log";
 import { loggerError, loggerInfo } from "@/lib/logger";
 import { retryRequest } from "@/lib/retryRequest";
 import { cabinetApi } from "@/share/api";
-import { SubmissionResponseStatus } from "@/types/status";
+import { SubmissionCodeStatus} from "@/types/status";
 
 const smtpHost = process.env.smtp_mail_server_host;
 const smtpPort = process.env.smtp_mail_server_port;
@@ -85,7 +85,7 @@ export const sendCabinetForVc = async ({
   walletId: number;
   email: string;
   externalLinkageId: string;
-}): Promise<SubmissionResponseStatus> => {
+}): Promise<SubmissionCodeStatus> => {
   const { consumer, badgeVc } = await findConsumerAndBadgeVc({ badgeVcId, consumerId });
 
   const cabinetApiUrl = `${consumer.cabinetUrl}${cabinetApi.v1.submissionBadge}`;
@@ -103,11 +103,16 @@ export const sendCabinetForVc = async ({
         user_email: email,
         badge_vc: vcJwt,
         user_id: externalLinkageId,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
     }, badgeCabinetRetryConfig);
 
     await createSubmission({ badgeVcId, walletId, email, consumerId, consumerName: consumer.consumerName });
-    return "success";
+    return {reason_msg: "success", reason_code: 0}
   } catch (e) {
     const { badUserId, badReqestOther, verifyBadgeNG, verifyVcNG } = submissionResult;
     const { status, data } = e.response;
@@ -117,12 +122,12 @@ export const sendCabinetForVc = async ({
       loggerError(`${logStatus.error} submission badge error!`, data.reason_code);
       switch (data.reason_code) {
         case badUserId:
-          return "invalid userId";
+          return {reason_msg: "invalid userId", reason_code: data.reason_code};
         case verifyBadgeNG:
         case verifyVcNG:
-          return "verification failure";
+          return {reason_msg: "verification failure", reason_code: data.reason_code};
         case badReqestOther:
-          return "other errors";
+          return {reason_msg: "other errors", reason_code: data.reason_code};
         default:
           throw new Error("invalid api access error");
       }

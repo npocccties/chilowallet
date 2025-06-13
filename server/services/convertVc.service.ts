@@ -60,6 +60,7 @@ export const convertVcFromBadge = async ({ apiPath, badgeMetaData, email, eppn, 
   } else {
     loggerDebug(`vc_credential_issuer: ${credentialIssuer}`);
   }
+  loggerInfo(`manifestURL: ${manifestURL}, manifestURL in env: ${process.env.vc_manifest_url}`);
   const acquiredAttestation = {};
 
   if (vcRequest.id_token_hint) {

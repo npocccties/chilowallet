@@ -12,6 +12,7 @@ export type VcDetailData = DisplayBadgeVc & {
   badgeExpires: string;
   courseUrl: string;
   submissions: BadgeVcSubmission[];
+  description: string;
 };
 
 export type KnowledgeBadges = KnowledgeBadge[];

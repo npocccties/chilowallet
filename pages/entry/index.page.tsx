@@ -13,6 +13,8 @@ import { loggerInfo, loggerError } from "@/lib/logger";
 import { getUserInfoFormJwt } from "@/lib/userInfo";
 import { findWallet } from "@/server/repository/wallet";
 
+// [NOTE] #81参照。インポートのページにおいて、ウォレット作成は自動実行としたため
+// 本ページは廃止。
 const EntryWallet = dynamic(() => import("@/components/page/wallet/Entry").then((mod) => mod.EntryWallet), {
   ssr: false,
 });

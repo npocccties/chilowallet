@@ -32,6 +32,7 @@ export const createVcDetailData = (
   badgeVc: BadgeVc,
   submissionsHistories: BadgeVcSubmission[],
   courseInfo: Alignment,
+  description: string
 ) => {
   const vcDetailData: VcDetailData = {
     badgeVcId: badgeVc.badgeVcId,
@@ -44,6 +45,7 @@ export const createVcDetailData = (
     vcDataPayload: badgeVc.vcDataPayload,
     courseUrl: courseInfo.targetUrl,
     submissions: submissionsHistories,
+    description: description
   };
 
   return vcDetailData;

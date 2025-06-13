@@ -1,7 +1,7 @@
 openapi: 3.0.3
 
 info:
-  title: OpenBadgeVC Walglet Server API
+  title: OpenBadgeVC Wallet Server API
   description: OpenBadgeVCウォレットサーバAPI
   version: 0.1.0
 

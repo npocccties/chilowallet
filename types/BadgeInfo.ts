@@ -1,3 +1,4 @@
+
 export class BadgeInfo {
   private _badgeInfo: IfBadgeInfo;
 
@@ -160,3 +161,6 @@ export interface IfPortalBadgeDetail1 {
 interface Wisdom {
   knowledge_badges_list: number[];
 }
+
+// POST指定されたバッジ情報と、それをもとにLMSから取得したバッジ情報の複合体
+export type ImportingBadgeStatus = IfUserBadgeStatus & IfBadgeInfo;
