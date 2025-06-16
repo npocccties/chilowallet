@@ -4,18 +4,22 @@ import { axiosClient } from "@/lib/axios";
 import { SubmissionVcRequestParam } from "@/types/api/submission";
 import { SubmissionResponseStatus } from "@/types/status";
 
+const apiPath = api.v1.submission.vc;
+export interface PostSubmissionResponse {
+  result: SubmissionResponseStatus;
+  reason_code?: number;
+}
+
 export const postSubmissionVc = async (
   param: SubmissionVcRequestParam,
-): Promise<{ result: SubmissionResponseStatus }> => {
-  const { consumerId, email, badgeVcId, externalLinkageId } = param;
-  const apiPath = api.v1.submission.vc;
-
-  const res = await axiosClient.post(apiPath, {
-    consumerId,
-    email,
-    badgeVcId,
-    externalLinkageId,
-  });
-
-  return res.data;
+): Promise<PostSubmissionResponse> => {
+  try {
+    const res = await axiosClient.post(api.v1.submission.vc, param);
+    return res.data;
+  } catch (err: any) {
+    return {
+      result: "error",
+      reason_code: err.response?.data?.reason_code,
+    };
+  }
 };

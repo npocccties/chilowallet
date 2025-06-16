@@ -4,7 +4,7 @@ import { Readable } from "stream";
 import axios from "axios";
 
 import { moodleRetryConfig, openbadgeVerifyRetryConfig } from "@/configs/retry";
-import { loggerDebug, loggerError } from "@/lib/logger";
+import { loggerDebug, loggerError, loggerInfo } from "@/lib/logger";
 import { retryRequest, retryRequestForBadgeVerify } from "@/lib/retryRequest";
 import { BadgeMetaData } from "@/types/badgeInfo/metaData";
 
@@ -104,6 +104,7 @@ export const validateOpenBadge = async (email: string, openBadgeMetadata: BadgeM
       },
     );
   }, openbadgeVerifyRetryConfig);
+  loggerInfo(`Open Badge verification response: ${JSON.stringify(data)}`);
 
   return data.report.valid;
 };

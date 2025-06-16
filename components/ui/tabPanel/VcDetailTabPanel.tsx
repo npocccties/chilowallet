@@ -13,8 +13,9 @@ type Props = {
   expired: boolean;
 };
 
-export const VcDetailTabPanel = ({ vcDetailData, knowledgeBadges, submissionsHistories, expired }: Props) => {
-  const { badgeEarnerEmail, badgeIssuerName, badgeExpires, courseUrl } = vcDetailData;
+export const VcDetailTabPanel = ({ 
+  vcDetailData, knowledgeBadges, submissionsHistories, expired}: Props) => {
+  const { badgeEarnerEmail, badgeIssuerName, badgeExpires, courseUrl, badgeIssuedon } = vcDetailData;
   return (
     <Tabs size="md" variant="enclosed">
       <TabList mb={6}>
@@ -26,6 +27,7 @@ export const VcDetailTabPanel = ({ vcDetailData, knowledgeBadges, submissionsHis
         <TabPanel>
           <CredentialSubjectItem name="email" data={badgeEarnerEmail} />
           <CredentialSubjectItem name="発行者" data={badgeIssuerName} />
+          <CredentialSubjectItem name="発行日" data={badgeIssuedon} />
           <CredentialSubjectItem name="有効期限" data={JSTdateToDisplay(badgeExpires)} isDanger={expired} />
           <CredentialSubjectItem name="コース情報" data={courseUrl} />
         </TabPanel>
@@ -59,12 +61,12 @@ const CredentialSubjectItem: React.FC<CredentialSubjectItemProps> = ({ name, dat
       {"コース情報" === name ? (
         <Text fontSize="md" mb={1}>
           <Link href={data as string} color={"primary.700"} isExternal>
-            OKUTEPのコース情報を見る <ExternalLinkIcon />
+            OZONE-EDUのコース情報を見る <ExternalLinkIcon />
           </Link>
         </Text>
       ) : data ? (
         <Text fontSize="md" mb={1}>
-          {data}
+          {typeof data === "string" ? data : data.toLocaleString()} {/* Date を文字列に変換 */}
         </Text>
       ) : (
         <Text fontSize="md" mb={1}>

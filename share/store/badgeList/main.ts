@@ -31,7 +31,8 @@ const useFetchBadgeList = () => {
         if (!data) {
           return defaultState;
         }
-        return data;
+        const badgeList = data.badgeList.filter(badge => badge.vcConverted === false)
+        return {...data, badgeList};
       });
     },
     [setState],

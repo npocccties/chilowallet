@@ -1,23 +1,10 @@
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  Box,
-  Flex,
-  useDisclosure,
+  Box
 } from "@chakra-ui/react";
-import { useRouter } from "next/router";
-import React, { useRef } from "react";
+import React from "react";
 
-import { DangerButton } from "@/components/ui/button/DangerButton";
-import { PrimaryButton } from "@/components/ui/button/PrimaryButton";
-import { SecondaryButton } from "@/components/ui/button/SecondaryButton";
-import { BadgeVcCard } from "@/components/ui/card/BadgeVcCard";
+import { BadgeVcCardDetail } from "@/components/ui/card/BadgeVcCardDetail";
 import { VcDetailTabPanel } from "@/components/ui/tabPanel/VcDetailTabPanel";
-import { pagePath } from "@/constants";
 import { isBefoerCurrentTimeJST } from "@/lib/date";
 import { vcDetailActions } from "@/share/store/credentialDetail/main";
 import { processingScreenActions } from "@/share/store/ui/processingScreen/man";
@@ -29,19 +16,24 @@ export const CredentialDetail: React.FC<CredentialDetailData> = ({
   submissionsHistories,
   badgeExportData,
 }) => {
-  const router = useRouter();
-  const cancelRef = useRef();
+  // const cancelRef = useRef();
   const expired = isBefoerCurrentTimeJST(vcDetailData.badgeExpires);
-  const isDeleteDisabled = vcDetailData.submissions.length !== 0;
+  // const isDeleteDisabled = vcDetailData.submissions.length !== 0;
   const { showProcessingScreen } = processingScreenActions.useShowProcessingScreen();
 
   const { deleteCredential } = vcDetailActions.useDeleteCredential();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleClickDelete = async () => {
     showProcessingScreen(async () => {
       await deleteCredential(vcDetailData.badgeVcId);
-      router.push(pagePath.credential.list);
+      // 削除後、戻る先は「戻る」ボタンと同じ
+      const backUrl = sessionStorage.getItem("back_url") || process.env.NEXT_PUBLIC_BACK_URL;
+      console.debug(`backUrl: ${backUrl}`);
+      // ページ遷移時の警告抑制のため、イベントを解除
+      window.onbeforeunload = null;
+      window.removeEventListener('beforeunload', () => {})
+      window.location.href = backUrl;
     });
   };
   return (
@@ -49,7 +41,11 @@ export const CredentialDetail: React.FC<CredentialDetailData> = ({
       {vcDetailData && (
         <Box>
           <Box mb={12}>
-            <BadgeVcCard badgeVc={vcDetailData} />
+            <BadgeVcCardDetail
+              badgeVc={vcDetailData} 
+              onDeleteClick={handleClickDelete}
+              badgeExportData={badgeExportData}
+              />
           </Box>
           <VcDetailTabPanel
             vcDetailData={vcDetailData}
@@ -57,15 +53,7 @@ export const CredentialDetail: React.FC<CredentialDetailData> = ({
             submissionsHistories={submissionsHistories}
             expired={expired}
           />
-          <Box mt={8}>
-            <PrimaryButton
-              w="full"
-              disabled={expired}
-              onClick={() => router.push(`${pagePath.submission.enter}/${router.query.badge_vc_id}`)}
-            >
-              バッジ提出
-            </PrimaryButton>
-          </Box>
+          {/** 
           <Flex justifyContent={"space-between"} mt={12}>
             <DangerButton w={160} disabled={isDeleteDisabled} onClick={onOpen}>
               削除
@@ -108,6 +96,7 @@ export const CredentialDetail: React.FC<CredentialDetailData> = ({
               </AlertDialogContent>
             </AlertDialogOverlay>
           </AlertDialog>
+          */}
         </Box>
       )}
     </>

@@ -19,6 +19,9 @@ export const verifyVcRequest = async (vcRequestUrl: string) => {
     vcRequestInJwt = await retryRequest(() => {
       return axios.get(requestUrl).then((res) => res.data);
     }, msEntraRetryConfig);
+    // ログが長大なため、Debugで設定。
+    loggerDebug(`vefifyVcRequest vcRequestInJwt: `, vcRequestInJwt);
+
     const header = getProtectedHeaderFromVCRequest(vcRequestInJwt);
     const webResolver = getResolver();
     const resolver = new Resolver(webResolver);

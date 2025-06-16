@@ -9,4 +9,10 @@ export type SubmissionResponseStatus =
   | "invalid userId"
   | "verification failure"
   | "other errors"
+  | "error"
   | undefined;
+
+  export type SubmissionCodeStatus = {
+    reason_code: number;
+    reason_msg: SubmissionResponseStatus;
+  };
