@@ -310,17 +310,17 @@ node keypair.ts
 | 変数名                               | 説明                                                | 備考 |
 | :----------------------------------- | :------------------------------------------         | :------------------------------------------ |
 | NEXT_PUBLIC_DASHBOARD_LINK           | ダッシュボードへのリンク                            | ウォレット側の / ページのリダイレクト先など。|
-| NEXT_PUBLIC_HEADER_LOGO_TITLE        | ヘッダのロゴ項目のタイトル                          ||
-| NEXT_PUBLIC_HEADER_LOGO_LINK         | ヘッダのロゴのリンク                                ||
-| NEXT_PUBLIC_HEADER_DASHBOARD_TITLE   | ヘッダの [ダッシュボード] のタイトル                ||
-| NEXT_PUBLIC_HEADER_DASHBOARD_LINK    | ヘッダの [ダッシュボード] のリンク                  ||
-| NEXT_PUBLIC_HEADER_LEARNING_TITLE    | ヘッダの [学びを探す] のタイトル                    ||
-| NEXT_PUBLIC_HEADER_LEARNING_LINK     | ヘッダの [学びを探す] のリンク                      ||
-| NEXT_PUBLIC_HEADER_ISSUER_TITLE      | ヘッダの [発行元] のタイトル                        ||
-| NEXT_PUBLIC_HEADER_ISSUER_NAME       | ヘッダの [発行元] の名称                            |「, 」区切りで複数指定|
-| NEXT_PUBLIC_HEADER_ISSUER_LINK       | ヘッダの [発行元] のリンク                          |「, 」区切りで複数指定|
-| NEXT_PUBLIC_FOOTER_NAME              | フッタに表示する項目の名称                          |「, 」区切りで複数指定|
-| NEXT_PUBLIC_FOOTER_LINK              | フッタに表示する項目のリンク                        |「, 」区切りで複数指定|
+| NEXT_PUBLIC_PORTAL_HEADER_LOGO_TITLE        | ヘッダのロゴ項目のタイトル                          ||
+| NEXT_PUBLIC_PORTAL_HEADER_LOGO_LINK         | ヘッダのロゴのリンク                                ||
+| NEXT_PUBLIC_PORTAL_HEADER_DASHBOARD_TITLE   | ヘッダの [ダッシュボード] のタイトル                ||
+| NEXT_PUBLIC_PORTAL_HEADER_DASHBOARD_LINK    | ヘッダの [ダッシュボード] のリンク                  ||
+| NEXT_PUBLIC_PORTAL_HEADER_LEARNING_TITLE    | ヘッダの [学びを探す] のタイトル                    ||
+| NEXT_PUBLIC_PORTAL_HEADER_LEARNING_LINK     | ヘッダの [学びを探す] のリンク                      ||
+| NEXT_PUBLIC_PORTAL_HEADER_ISSUER_TITLE      | ヘッダの [発行元] のタイトル                        ||
+| NEXT_PUBLIC_PORTAL_HEADER_ISSUER_NAME       | ヘッダの [発行元] の名称                            |「, 」区切りで複数指定|
+| NEXT_PUBLIC_PORTAL_HEADER_ISSUER_LINK       | ヘッダの [発行元] のリンク                          |「, 」区切りで複数指定|
+| NEXT_PUBLIC_PORTAL_FOOTER_NAME              | フッタに表示する項目の名称                          |「, 」区切りで複数指定|
+| NEXT_PUBLIC_PORTAL_FOOTER_LINK              | フッタに表示する項目のリンク                        |「, 」区切りで複数指定|
 | NEXT_PUBLIC_BACK_URL                 | 「戻る」ボタンの遷移先デフォルト値                  | back_urlクエリパラメータが指定されている場合は、そちらを優先します。|
 
 ## 6. Moodleとの連携
