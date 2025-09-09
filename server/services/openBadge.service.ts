@@ -12,7 +12,7 @@ const Through = require("stream").PassThrough;
 
 const pngitxt = require("png-itxt");
 
-const openBadgeVerifierURL = "https://openbadgesvalidator.imsglobal.org/results";
+const openBadgeVerifierURL = "https://openbadgesvalidator.1edtech.org/results";
 
 export const getBadgeClassById = async (badgeClassId: string): Promise<any> => {
   try {
