@@ -26,6 +26,7 @@ export const errors = {
   validation: {
     email: "eメールアドレスが不正な値です。",
     openBadge: "Open Badgeの検証に失敗しました。",
+    openBadgeUnavailable: "Open Badgeの検証サービスに一時的に接続できません。時間をおいて再度お試しください。",
   },
   moodleErrorCode: {
     invalidLogin: "invalidlogin",

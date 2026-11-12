@@ -270,6 +270,7 @@ Next.jsアプリケーションでは、環境毎に以下のパターンで.env
 |moodle_api_request_retry_time|MoodleのAPIアクセス失敗時のリトライ間隔（ms）設定|-|必須|
 |smtp_mail_request_retry_count|メール送信用サーバーアクセス失敗時のリトライ回数設定|-|必須|
 |smtp_mail_request_retry_time|メール送信用サーバーアクセス失敗時のリトライ間隔（ms）設定|-|必須|
+|openbadge_verifier_url|Open Badge検証サービス（openbadges-validator-core）の `/results` エンドポイントのURL|-|必須|
 |oepnbadge_verify_api_request_retry_count|openbadge検証用APIアクセス失敗時のリトライ回数設定|-|必須|
 |oepnbadge_verify_api_request_retry_time|openbadge検証用APIアクセス失敗時のリトライ間隔（ms）設定|-|必須|
 |ms_entra_id_api_request_retry_count|VC発行関連（Microsoft Entra Verified ID）アクセス失敗時のリトライ回数設定|-|必須|

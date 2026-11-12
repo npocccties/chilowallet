@@ -3,6 +3,7 @@ import { createRequest, createResponse } from "node-mocks-http";
 
 import handler from "./index.api";
 
+import { errors } from "@/constants/error";
 import { validateOpenBadge } from "@/server/services/openBadge.service";
 import { api } from "@/share/api";
 import { loginJwt } from "@/test-server/mocks/api/login/cookie";
@@ -60,7 +61,7 @@ describe(api.v1.badge.convert, () => {
       },
     });
 
-    mockValidateOpenBadge.mockResolvedValue(true);
+    mockValidateOpenBadge.mockResolvedValue({ status: "valid" });
     const mockRes = createResponse<ApiResponse>();
 
     await handler(mockReq, mockRes);
@@ -82,11 +83,56 @@ describe(api.v1.badge.convert, () => {
       },
     });
 
-    mockValidateOpenBadge.mockResolvedValue(false);
+    mockValidateOpenBadge.mockResolvedValue({ status: "invalid", reason: "recipient email does not match" });
     const mockRes = createResponse<ApiResponse>();
 
     await handler(mockReq, mockRes);
 
     expect(mockRes.statusCode).toEqual(400);
+  });
+
+  test("バッジの検証サービスに一時的に接続できないと、503が返る", async () => {
+    const mockReq = createRequest<ApiRequest>({
+      body: {
+        uniquehash: "wwwwwwyyyyyyyypppppp",
+        email: "xxxx@example.com",
+        badgeMetaData: mockBadgeMetaData,
+        lmsId: 1,
+        lmsName: "○○サービス",
+      },
+      cookies: {
+        session_cookie: loginJwt,
+      },
+    });
+
+    mockValidateOpenBadge.mockResolvedValue({ status: "unavailable", reason: "verifier request failed" });
+    const mockRes = createResponse<ApiResponse>();
+
+    await handler(mockReq, mockRes);
+
+    expect(mockRes.statusCode).toEqual(503);
+    expect(mockRes._getJSONData().error.errorMessage).toEqual(errors.validation.openBadgeUnavailable);
+  });
+
+  test("バッジの検証で予期しない例外が発生すると、500が返る", async () => {
+    const mockReq = createRequest<ApiRequest>({
+      body: {
+        uniquehash: "wwwwwwyyyyyyyypppppp",
+        email: "xxxx@example.com",
+        badgeMetaData: mockBadgeMetaData,
+        lmsId: 1,
+        lmsName: "○○サービス",
+      },
+      cookies: {
+        session_cookie: loginJwt,
+      },
+    });
+
+    mockValidateOpenBadge.mockRejectedValue(new Error("unexpected"));
+    const mockRes = createResponse<ApiResponse>();
+
+    await handler(mockReq, mockRes);
+
+    expect(mockRes.statusCode).toEqual(500);
   });
 });
