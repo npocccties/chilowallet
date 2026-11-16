@@ -41,10 +41,27 @@ services:
     networks:
       - app_network
       - db_network
+      - verifier_network
     container_name: chilowallet
     restart: "no"
     environment:
       - LOG_LEVEL=$LOG_LEVEL
+    logging:
+      driver: json-file
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+
+  # Open Badge 検証サービス（openbadges-validator-core）。ウォレットからのみ参照し、外部には公開しない。
+  # 取得先は ALLOWED_FETCH_HOSTS に限定する（DBのネットワークには接続しない）。
+  obv-validator:
+    build:
+      context: ${BADGE_VERIFIER_BUILD_CONTEXT:?BADGE_VERIFIER_BUILD_CONTEXT is not set}
+    networks:
+      - verifier_network
+    restart: "always"
+    environment:
+      - ALLOWED_FETCH_HOSTS=${ALLOWED_FETCH_HOSTS:?ALLOWED_FETCH_HOSTS is not set}
     logging:
       driver: json-file
       options:
@@ -58,3 +75,5 @@ networks:
   db_network:
     driver: bridge
     external: true
+  verifier_network:
+    driver: bridge

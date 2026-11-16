@@ -224,6 +224,8 @@ sampleに記載の値（client_idやclient_secrett等）はダミー値です。
 |LOG_MAX_SIZE|ログファイルサイズ<br>単位には k / m / g のいずれか指定|100m|必須|
 |LOG_MAX_FILE|ログファイルの世代数|7|必須|
 |DUMP_BACKUP_DIR|DBの圧縮ファイルのバックアップディレクトリ（絶対パス指定）<br>DBバックアップを実行すると `/var/chilowallet.dump` をダンプ出力するが、そのダンプファイルを下記命名で圧縮したうえで左記ディレクトリに格納する<br>`chilowallet.dump_{yyyyMMdd}.tar.gz`|/var/chilowallet/db_dump_backup|必須|
+|BADGE_VERIFIER_BUILD_CONTEXT|Open Badge検証サービス（openbadges-validator-core）のビルド元<br>Gitリポジトリ（`<リポジトリURL>#<ブランチ／タグ>`）またはローカルのディレクトリを指定する<br>Python 3.12 対応と取得先の制限を入れた fork（`https://github.com/npocccties/openbadges-validator-core.git#py312-modernize`）を想定|-|必須|
+|ALLOWED_FETCH_HOSTS|Open Badge検証サービスが取得してよいホスト名（カンマ区切り、完全一致、https・443番ポートのみ）<br>バッジを発行するMoodleのホスト名を指定する（例：`lms.example.org`）|-|必須|
 |DUMP_BACKUP_COUNT|DBの圧縮ファイルの保持日数<br>・保持日数を経過したDBの圧縮ファイルは削除される (例)1週間、保持したい場合は `7` を指定する<br>・削除の契機は、DBバックアップの実行時<br>・起点は昨日|7|必須|
 
 ## 5-2. Next.jsアプリケーション用
@@ -270,7 +272,7 @@ Next.jsアプリケーションでは、環境毎に以下のパターンで.env
 |moodle_api_request_retry_time|MoodleのAPIアクセス失敗時のリトライ間隔（ms）設定|-|必須|
 |smtp_mail_request_retry_count|メール送信用サーバーアクセス失敗時のリトライ回数設定|-|必須|
 |smtp_mail_request_retry_time|メール送信用サーバーアクセス失敗時のリトライ間隔（ms）設定|-|必須|
-|openbadge_verifier_url|Open Badge検証サービス（openbadges-validator-core）の `/results` エンドポイントのURL|-|必須|
+|openbadge_verifier_url|Open Badge検証サービス（openbadges-validator-core）の `/results` エンドポイントのURL<br>docker-compose.*.yml の検証サービスを使う場合は `http://obv-validator:8000/results`|-|必須|
 |oepnbadge_verify_api_request_retry_count|openbadge検証用APIアクセス失敗時のリトライ回数設定|-|必須|
 |oepnbadge_verify_api_request_retry_time|openbadge検証用APIアクセス失敗時のリトライ間隔（ms）設定|-|必須|
 |ms_entra_id_api_request_retry_count|VC発行関連（Microsoft Entra Verified ID）アクセス失敗時のリトライ回数設定|-|必須|
