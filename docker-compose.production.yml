@@ -18,6 +18,8 @@ services:
     restart: "always"
     environment:
       - LOG_LEVEL=$LOG_LEVEL
+      # 複数のネットワークに接続しているため、Next.js（standalone）がコンテナ名の IP だけで待ち受けないよう全インターフェースで待ち受ける。
+      - HOSTNAME=0.0.0.0
     logging:
       driver: json-file
       options:
