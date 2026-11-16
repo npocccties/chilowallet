@@ -71,6 +71,43 @@ describe("classifyVerifierReport", () => {
     expect(classifyVerifierReport(report).status).toEqual("invalid");
   });
 
+  test("発行元が一時的なエラー（TemporaryFetchError）を返したなら unavailable", () => {
+    const report = {
+      valid: false,
+      messages: [
+        {
+          name: "FETCH_HTTP_NODE",
+          messageLevel: "ERROR",
+          result: "TemporaryFetchError: HTTP 503 when fetching url https://lms.example.org/badges/assertion.php",
+        },
+      ],
+    };
+    expect(classifyVerifierReport(report).status).toEqual("unavailable");
+  });
+
+  test("一時的な取得エラーに連鎖したエラーだけなら unavailable", () => {
+    const report = {
+      valid: false,
+      messages: [
+        connectionErrorMessage,
+        {
+          name: "VALIDATE_EXPECTED_NODE_CLASS",
+          messageLevel: "ERROR",
+          result: "Task could not run due to unmet prerequisites.",
+        },
+      ],
+    };
+    expect(classifyVerifierReport(report).status).toEqual("unavailable");
+  });
+
+  test("一時的な取得エラーと、バッジ自体の検証エラーが両方あれば invalid", () => {
+    const report = {
+      valid: false,
+      messages: [connectionErrorMessage, { name: "VALIDATE_PROPERTY", messageLevel: "ERROR", result: "x" }],
+    };
+    expect(classifyVerifierReport(report).status).toEqual("invalid");
+  });
+
   test("想定外のレスポンスなら unavailable", () => {
     expect(classifyVerifierReport(undefined).status).toEqual("unavailable");
     expect(classifyVerifierReport({}).status).toEqual("unavailable");
@@ -156,6 +193,15 @@ describe("validateOpenBadge", () => {
 
     expect(result.status).toEqual("invalid");
     expect(mockPost).toHaveBeenCalledTimes(1);
+  });
+
+  test.each([408, 429])("検証サービスが %i を返せば、一時的な状態としてリトライして unavailable", async (status) => {
+    mockPost.mockRejectedValue({ response: { status }, message: "temporary" });
+
+    const result = await validateOpenBadge(EMAIL, makeBadge());
+
+    expect(result.status).toEqual("unavailable");
+    expect(mockPost).toHaveBeenCalledTimes(3);
   });
 
   test("発行元に一時的に接続できなかった後、再試行で成功すれば valid", async () => {
