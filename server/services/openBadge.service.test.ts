@@ -134,6 +134,23 @@ describe("validateOpenBadge", () => {
     expect(mockPost.mock.calls[0][0]).toEqual(VERIFIER_URL);
   });
 
+  test("検証サービスへの問い合わせにはタイムアウトを設定する", async () => {
+    mockPost.mockResolvedValue(verifierResponse({ valid: true, messages: [] }));
+
+    await validateOpenBadge(EMAIL, makeBadge());
+
+    expect(mockPost.mock.calls[0][2]?.timeout).toBeGreaterThan(0);
+  });
+
+  test("検証サービスの応答がタイムアウトしたら、リトライして unavailable", async () => {
+    mockPost.mockRejectedValue({ code: "ECONNABORTED", message: "timeout of 60000ms exceeded" });
+
+    const result = await validateOpenBadge(EMAIL, makeBadge());
+
+    expect(result.status).toEqual("unavailable");
+    expect(mockPost).toHaveBeenCalledTimes(3);
+  });
+
   test("受信者のメールが一致しなければ、検証サービスを呼ばずに invalid", async () => {
     const result = await validateOpenBadge("other@example.com", makeBadge());
 

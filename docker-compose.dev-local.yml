@@ -3,6 +3,7 @@ services:
     tty: true
     networks:
       - app_network
+      - verifier_network
     build:
       context: .
       dockerfile: Dockerfile.dev-local
@@ -17,7 +18,10 @@ services:
     environment:
       - LOG_LEVEL=$LOG_LEVEL
     depends_on:
-      - db
+      db:
+        condition: service_started
+      obv-validator:
+        condition: service_healthy
 
   db:
     image: postgres:13
@@ -38,8 +42,25 @@ services:
       - db_data:/var/lib/postgresql/data
       - ./sql:/docker-entrypoint-initdb.d
 
+  # Open Badge 検証サービス（openbadges-validator-core）。本番と同じ構成をローカルでも使う。
+  obv-validator:
+    build:
+      context: ${BADGE_VERIFIER_BUILD_CONTEXT:?BADGE_VERIFIER_BUILD_CONTEXT is not set}
+    networks:
+      - verifier_network
+    environment:
+      - ALLOWED_FETCH_HOSTS=${ALLOWED_FETCH_HOSTS:?ALLOWED_FETCH_HOSTS is not set}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
 networks:
   app_network:
+    driver: bridge
+  verifier_network:
     driver: bridge
 volumes:
   node_modules:
