@@ -62,7 +62,7 @@ export const StatusIcon: React.FC<StatusIconProps> = ({ status, reason_code, isS
             </PopoverTrigger>
             <PopoverContent w="fit-content" maxW="sm" bg="gray.700" color="white" border="none">
               <PopoverArrow bg="gray.700" />
-              <PopoverBody>{getErrorMessage()}</PopoverBody>
+              <PopoverBody textAlign="left">{getErrorMessage()}</PopoverBody>
             </PopoverContent>
           </Popover>
         ) : (
