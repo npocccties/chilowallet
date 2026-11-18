@@ -4,18 +4,25 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion";
 import React from 'react';
 
+import { BadgeVerifierUnavailableMessage } from "@/components/page/error/BadgeVerifierUnavailableMessage";
+
 type StatusIconProps = {
   status: "importing" | "complete" | "paused" | "error";
   reason_code?: number | string;
   isShowError?: boolean | true 
+  // バッジ検証サービスが停止していて提出できなかった
+  verifierUnavailable?: boolean;
 };
 
-export const StatusIcon: React.FC<StatusIconProps> = ({ status, reason_code, isShowError = true }) => {
+export const StatusIcon: React.FC<StatusIconProps> = ({ status, reason_code, isShowError = true, verifierUnavailable = false }) => {
   let color = "#1e3050"; // importing 用の色
   const code = Number(reason_code);
   console.log("[StatusIcon] reason_code:", reason_code, "→ parsed:", code);
 
   const getErrorMessage = () => {
+    if (verifierUnavailable) {
+      return <BadgeVerifierUnavailableMessage action="submission" />;
+    }
     if (code === 101) {
       return "登録されていないIDです";
     } else if (code === 103) {
@@ -53,9 +60,9 @@ export const StatusIcon: React.FC<StatusIconProps> = ({ status, reason_code, isS
             <PopoverTrigger>
               <Image src={getImageSrc(status)} alt={status} boxSize="50px" />
             </PopoverTrigger>
-            <PopoverContent w="fit-content" bg="gray.700" color="white" border="none">
+            <PopoverContent w="fit-content" maxW="sm" bg="gray.700" color="white" border="none">
               <PopoverArrow bg="gray.700" />
-              <PopoverBody>{getErrorMessage()}</PopoverBody>
+              <PopoverBody textAlign="left">{getErrorMessage()}</PopoverBody>
             </PopoverContent>
           </Popover>
         ) : (

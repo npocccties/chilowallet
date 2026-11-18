@@ -10,10 +10,37 @@ services:
       - "3001:3000"
     networks:
       - db_network
+      - verifier_network
     container_name: chilowallet
     restart: "always"
     environment:
       - LOG_LEVEL=$LOG_LEVEL
+      # 複数のネットワークに接続しているため、Next.js（standalone）がコンテナ名の IP だけで待ち受けないよう全インターフェースで待ち受ける。
+      - HOSTNAME=0.0.0.0
+    logging:
+      driver: json-file
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+
+  # Open Badge 検証サービス（openbadges-validator-core）。ウォレットからのみ参照し、外部には公開しない。
+  # 取得先は ALLOWED_FETCH_HOSTS に限定する（DBのネットワークには接続しない）。
+  obv-validator:
+    build:
+      context: ${BADGE_VERIFIER_BUILD_CONTEXT:?BADGE_VERIFIER_BUILD_CONTEXT is not set}
+    networks:
+      - verifier_network
+    restart: "always"
+    environment:
+      - ALLOWED_FETCH_HOSTS=${ALLOWED_FETCH_HOSTS:?ALLOWED_FETCH_HOSTS is not set}
+    # 状態の確認用（check_badge_verifier.sh が unhealthy なら再起動し、異常・復旧を通知する）。
+    # ウォレットは検証サービスの状態に関係なく起動する（止まっている間はインポート・提出だけができない）。
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     logging:
       driver: json-file
       options:
@@ -24,3 +51,5 @@ networks:
   db_network:
     driver: bridge
     external: true
+  verifier_network:
+    driver: bridge

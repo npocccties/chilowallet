@@ -8,6 +8,7 @@ export type SubmissionResponseStatus =
   | "success"
   | "invalid userId"
   | "verification failure"
+  | "verification unavailable"
   | "other errors"
   | "error"
   | undefined;

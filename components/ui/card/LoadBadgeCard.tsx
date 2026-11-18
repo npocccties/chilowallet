@@ -17,6 +17,8 @@ import {
     badgeExportData: string;
     status: "importing" | "complete" | "paused" | "error";
     reason_code?: number | string;
+    // バッジ検証サービスが停止していて提出できなかった
+    verifierUnavailable?: boolean;
     badgeName: string;
   };
   
@@ -67,7 +69,7 @@ import {
         >
           <Box>
             <Box display="flex" justifyContent="flex-start" alignItems="center" mb={2}>
-                <StatusIcon status={props.status} reason_code={props.reason_code}/>
+                <StatusIcon status={props.status} reason_code={props.reason_code} verifierUnavailable={props.verifierUnavailable}/>
             </Box>
             <Text fontWeight="bold" fontSize="lg" textAlign="left" w="100%">
               {props.badgeName}

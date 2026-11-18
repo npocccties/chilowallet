@@ -55,13 +55,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   try {
-    // OpenBadgeの検証エラー。
-    const result = await validateOpenBadge(email, badgeMetaData);
-    loggerInfo("openbadge validation result", result);
-    if (!result) throw new Error();
-  } catch {
-    loggerError(`${logId} ${logStatus.error} open badge validation failed`);
-    return res.status(400).json({ error: { errorMessage: errors.validation.openBadge } });
+    const validation = await validateOpenBadge(email, badgeMetaData);
+    loggerInfo(`${logId} openbadge validation result`, validation);
+    if (validation.status === "invalid") {
+      // バッジ自体が不正。
+      loggerError(`${logId} ${logStatus.error} open badge validation failed: ${validation.reason}`);
+      return res.status(400).json({ error: { errorMessage: errors.validation.openBadge } });
+    }
+    if (validation.status === "unavailable") {
+      // 検証サービスや発行元に接続できないなど、一時的な理由で検証できなかった。
+      loggerError(`${logId} ${logStatus.error} open badge validation unavailable: ${validation.reason}`);
+      return res.status(503).json({ error: { errorMessage: errors.validation.openBadgeUnavailable } });
+    }
+  } catch (e) {
+    loggerError(`${logId} ${logStatus.error} open badge validation threw an unexpected error`, e?.message);
+    return res.status(500).json({ error: { errorMessage: errors.response500.message } });
   }
 
   try {

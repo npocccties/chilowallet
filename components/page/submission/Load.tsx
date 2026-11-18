@@ -12,6 +12,7 @@ type Badge = {
   name: string;
   status: "importing" | "complete" | "paused" | "error";
   reason_code?: number | string;
+  verifierUnavailable?: boolean;
 };
 
 type Props = {
@@ -69,6 +70,7 @@ const Load = ({ badgeList, consumer, submissionEmail, externalLinkageId }: Props
         if (response.reason_code !== undefined) {
           updated[currentIndex].reason_code = response.reason_code;
         }
+        updated[currentIndex].verifierUnavailable = response.result === "verification unavailable";
 
         setProgressData(updated);
 
@@ -197,6 +199,7 @@ const Load = ({ badgeList, consumer, submissionEmail, externalLinkageId }: Props
               badgeExportData={""}
               status={badge.status}
               reason_code={badge.reason_code}
+              verifierUnavailable={badge.verifierUnavailable}
               badgeName={badgeName}
             />
           );
