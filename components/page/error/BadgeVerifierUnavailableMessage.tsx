@@ -19,14 +19,15 @@ export const BadgeVerifierUnavailableMessage = ({ action }: Props) => {
     <>
       <Text mb={2}>{badgeVerifierUnavailable[action]}</Text>
       <Text>
-        {badgeVerifierUnavailable.contact}
-        {contactInfo && (
+        {contactInfo ? (
           <>
-            {" "}
+            {badgeVerifierUnavailable.contact}
             <Link href={contactInfo.url} isExternal textDecoration="underline">
               {contactInfo.name}
             </Link>
           </>
+        ) : (
+          badgeVerifierUnavailable.contactWithoutLink
         )}
       </Text>
     </>

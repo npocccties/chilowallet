@@ -80,7 +80,7 @@ notify() {
 case "$status" in
   running/healthy)
     if [ "$previous" != ok ]; then
-      notify "$NAME が復旧しました（状態: $status、それまでの自動再起動: $restarts 回）。" \
+      notify "${NAME}が復旧しました（状態: $status、それまでの自動再起動: $restarts 回）。" \
         "[復旧] Open Badge 検証サービス（$PROJECT）" || exit 1
     fi
     save_state ok 0
@@ -100,10 +100,10 @@ case "$status" in
       else
         result="再起動に失敗しました（$restarts/$MAX_RESTARTS 回目）"
       fi
-      notify "$NAME が正常ではないため（状態: $status）、$result。$IMPACT" \
+      notify "${NAME}が正常ではないため（状態: $status）、$result。$IMPACT" \
         "[警告] Open Badge 検証サービスを再起動（$PROJECT）" || exit 1
     elif [ "$previous" != limit ]; then
-      notify "$NAME が $MAX_RESTARTS 回再起動しても正常に戻りません（状態: $status）。自動での再起動をやめます。サーバーを確認してください。$IMPACT" \
+      notify "${NAME}が $MAX_RESTARTS 回再起動しても正常に戻りません（状態: $status）。自動での再起動をやめます。サーバーを確認してください。$IMPACT" \
         "[要対応] Open Badge 検証サービスが復旧しません（$PROJECT）" || exit 1
       save_state limit "$restarts"
     fi
@@ -112,7 +112,7 @@ case "$status" in
   *)
     # 停止・見つからないなど。再起動の対象外なので通知だけ行う。
     if [ "$previous" = ok ]; then
-      notify "$NAME が正常ではありません（状態: $status）。サーバーを確認してください。$IMPACT" \
+      notify "${NAME}が正常ではありません（状態: $status）。サーバーを確認してください。$IMPACT" \
         "[警告] Open Badge 検証サービスの異常（$PROJECT）" || exit 1
       save_state ng "$restarts"
     fi
