@@ -28,6 +28,14 @@ export const errors = {
     openBadge: "Open Badgeの検証に失敗しました。",
     openBadgeUnavailable: "Open Badgeの検証サービスに一時的に接続できません。時間をおいて再度お試しください。",
   },
+  badgeVerifierUnavailable: {
+    label: "バッジ検証サービスが停止しています",
+    import:
+      "バッジの検証サービスが一時的に停止しているため、現在バッジのインポートができません。ご不便をおかけして申し訳ありません。時間をおいて再度お試しください。",
+    submission:
+      "バッジの検証サービスが一時的に停止しているため、バッジを提出できませんでした。ご不便をおかけして申し訳ありません。時間をおいて再度お試しください。",
+    contact: "解決しない場合は、お問い合わせください。",
+  },
   moodleErrorCode: {
     invalidLogin: "invalidlogin",
   },

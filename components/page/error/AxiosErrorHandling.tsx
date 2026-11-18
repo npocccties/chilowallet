@@ -11,6 +11,7 @@ import {
 import { AxiosError, AxiosResponse } from "axios";
 import { Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState } from "react";
 
+import { BadgeVerifierUnavailableMessage } from "@/components/page/error/BadgeVerifierUnavailableMessage";
 import { SecondaryButton } from "@/components/ui/button/SecondaryButton";
 import { errors } from "@/constants/error";
 import { axiosClient } from "@/lib/axios";
@@ -26,6 +27,7 @@ export const AxiosErrorHandling = (props: Props) => {
   // const [serverError, setServerError] = useState(false);
   const [clientReqestError, setClientReqestError] = useState(false);
   const [UnAuthrized, setUnAuthrized] = useState(false);
+  const [badgeVerifierUnavailable, setBadgeVerifierUnavailable] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -57,6 +59,16 @@ export const AxiosErrorHandling = (props: Props) => {
             setClientReqestError(true);
             setErrorMessage(detailmessage);
             return Promise.reject(error.response?.data);
+          case 503:
+            // バッジ検証サービスが停止していて、インポートができない。
+            // @ts-ignore
+            if (error.response?.data?.error?.errorMessage === errors.validation.openBadgeUnavailable) {
+              setBadgeVerifierUnavailable(true);
+              return Promise.reject(error.response?.data);
+            }
+            setUnexpectedError(true);
+            setErrorMessage(detailmessage);
+            return Promise.reject(error.response?.data);
           case 500:
             // setServerError(true);
             setErrorMessage(detailmessage);
@@ -85,6 +97,14 @@ export const AxiosErrorHandling = (props: Props) => {
               title={errors.unAuthrizedError.label}
               message={errors.unAuthrizedError.message}
               detail={errorMessage}
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+            />
+          )}
+          {badgeVerifierUnavailable && (
+            <ErrorDialog
+              title={errors.badgeVerifierUnavailable.label}
+              message={<BadgeVerifierUnavailableMessage action="import" />}
               isOpen={isOpen}
               setIsOpen={setIsOpen}
             />
@@ -130,8 +150,8 @@ const ErrorDialog = ({
   setIsOpen,
 }: {
   title: string;
-  message: string;
-  detail: any;
+  message: ReactNode;
+  detail?: any;
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
 }) => {
@@ -147,10 +167,10 @@ const ErrorDialog = ({
           </AlertDialogHeader>
 
           <AlertDialogBody>
-            <Text fontSize={"lg"} mb={4}>
+            <Text as="div" fontSize={"lg"} mb={4}>
               {message}
             </Text>
-            <Text fontSize={"md"}>詳細: {detail}</Text>
+            {detail !== undefined && <Text fontSize={"md"}>詳細: {detail}</Text>}
           </AlertDialogBody>
 
           <AlertDialogFooter>

@@ -73,6 +73,9 @@ type SubmissionResponse = {
   reason_msg: string;
 };
 
+// キャビネットが、バッジ検証サービスを一時的に使えないときに返す reason_msg（の一部）。
+const CABINET_VERIFIER_UNAVAILABLE_MESSAGE = "OpenBadge verification temporarily unavailable";
+
 export const sendCabinetForVc = async ({
   badgeVcId,
   consumerId,
@@ -124,6 +127,11 @@ export const sendCabinetForVc = async ({
         case badUserId:
           return {reason_msg: "invalid userId", reason_code: data.reason_code};
         case verifyBadgeNG:
+          // キャビネットは、検証サービスが一時的に使えない場合も 102 を返し、reason_msg で区別する。
+          if (String(data.reason_msg ?? "").includes(CABINET_VERIFIER_UNAVAILABLE_MESSAGE)) {
+            return {reason_msg: "verification unavailable", reason_code: data.reason_code};
+          }
+          return {reason_msg: "verification failure", reason_code: data.reason_code};
         case verifyVcNG:
           return {reason_msg: "verification failure", reason_code: data.reason_code};
         case badReqestOther:

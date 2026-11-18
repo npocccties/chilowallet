@@ -43,9 +43,6 @@ services:
       - db_network
       - verifier_network
     container_name: chilowallet
-    depends_on:
-      obv-validator:
-        condition: service_healthy
     restart: "no"
     environment:
       - LOG_LEVEL=$LOG_LEVEL
@@ -67,7 +64,8 @@ services:
     restart: "always"
     environment:
       - ALLOWED_FETCH_HOSTS=${ALLOWED_FETCH_HOSTS:?ALLOWED_FETCH_HOSTS is not set}
-    # コンテナ内の gunicorn が応答するまでウォレットを起動しない。
+    # 状態の確認用（check_badge_verifier.sh が unhealthy なら再起動し、異常・復旧を通知する）。
+    # ウォレットは検証サービスの状態に関係なく起動する（止まっている間はインポート・提出だけができない）。
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=5)"]
       interval: 30s

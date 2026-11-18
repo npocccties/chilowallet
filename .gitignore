@@ -13,3 +13,5 @@ db/
 !.vscode/launch.json
 
 key.txt
+# Open Badge 検証サービスの監視スクリプトの状態ファイル
+.badge_verifier_state

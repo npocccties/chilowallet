@@ -33,3 +33,6 @@ function parseUrls(name: string, url:string): urlInfos {
 
 export const issuerInfos = parseUrls(issuerName, issuerLink)
 export const footerInfos = parseUrls(footerName, footerLink)
+
+// フッターのリンクのうち「お問い合わせ」のもの。設定されていなければ undefined。
+export const contactInfo: urlInfo | undefined = footerInfos.find((info) => info.name.includes("お問い合わせ") && info.url);

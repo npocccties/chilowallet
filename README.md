@@ -164,6 +164,22 @@ session_cookieというNameのeppn, displayNameをPayloadに含んだ署名付�
 
    - `app_stop.sh` と `app_start.sh` を呼びます
 
+   Open Badge 検証サービスの監視
+
+   ```
+   chilowallet/check_badge_verifier.sh
+   ```
+
+   - 検証サービス（`obv-validator`）が unhealthy になったら再起動して通知します。正常に戻らないまま再起動が上限（`BADGE_VERIFIER_MAX_RESTARTS`、既定3回）に達したら、再起動をやめて通知します（Docker の `restart: always` は unhealthy では再起動しないため）
+   - 停止しているなど再起動の対象外の異常と、復旧したときも通知します（異常が続いている間、同じ通知は繰り返しません）
+   - 通知先は `.env` の `BADGE_VERIFIER_ALERT_WEBHOOK_URL`（Slack）と `BADGE_VERIFIER_ALERT_MAIL_TO`（メール、ホストの `mail` コマンドを使用）で指定します
+   - 検証サービスが止まっていても、ウォレットの他の機能は利用できます（バッジのインポートだけができなくなります）
+   - cron で数分おきに実行してください（例：5分おき）
+
+   ```
+   */5 * * * * /path/to/chilowallet/check_badge_verifier.sh >> /var/log/check_badge_verifier.log 2>&1
+   ```
+
    DBのデータはvolumeによって保持されますが、万が一復元が必要な場合は後述のDBリストアコマンドを実行してください。
 
    DBバックアップ  
@@ -228,6 +244,10 @@ sampleに記載の値（client_idやclient_secrett等）はダミー値です。
 |DUMP_BACKUP_DIR|DBの圧縮ファイルのバックアップディレクトリ（絶対パス指定）<br>DBバックアップを実行すると `/var/chilowallet.dump` をダンプ出力するが、そのダンプファイルを下記命名で圧縮したうえで左記ディレクトリに格納する<br>`chilowallet.dump_{yyyyMMdd}.tar.gz`|/var/chilowallet/db_dump_backup|必須|
 |BADGE_VERIFIER_BUILD_CONTEXT|Open Badge検証サービス（openbadges-validator-core）のビルド元<br>Gitリポジトリ（`<リポジトリURL>#<タグ>`）またはローカルのディレクトリを指定する<br>Python 3.12 対応と取得先の制限を入れた fork（`https://github.com/npocccties/openbadges-validator-core.git`）を想定<br>ブランチを指定するとデプロイのたびに最新のコードでビルドされるため、本番ではタグを指定する|-|必須|
 |ALLOWED_FETCH_HOSTS|Open Badge検証サービスが取得してよいホスト名（カンマ区切り、完全一致、https・443番ポートのみ）<br>バッジを発行するMoodleのホスト名を指定する（例：`lms.example.org`）|-|必須|
+|BADGE_VERIFIER_ALERT_WEBHOOK_URL|検証サービスの異常・復旧を通知する Slack の Incoming Webhook の URL（`check_badge_verifier.sh` が使用）|-|任意|
+|BADGE_VERIFIER_ALERT_MAIL_TO|検証サービスの異常・復旧を通知するメールの宛先（`check_badge_verifier.sh` が使用）|-|任意|
+|BADGE_VERIFIER_MAX_RESTARTS|検証サービスが unhealthy のとき、正常に戻るまでに `check_badge_verifier.sh` が再起動する上限回数|`3`|任意|
+|BADGE_VERIFIER_COMPOSE_PROJECT|`check_badge_verifier.sh` が監視する compose のプロジェクト名（`app_start.sh` の `-p` と同じ値）|`chilowallet-app`|任意|
 |DUMP_BACKUP_COUNT|DBの圧縮ファイルの保持日数<br>・保持日数を経過したDBの圧縮ファイルは削除される (例)1週間、保持したい場合は `7` を指定する<br>・削除の契機は、DBバックアップの実行時<br>・起点は昨日|7|必須|
 
 ## 5-2. Next.jsアプリケーション用
@@ -324,7 +344,7 @@ node keypair.ts
 | NEXT_PUBLIC_HEADER_ISSUER_TITLE      | ヘッダの [発行元] のタイトル                        ||
 | NEXT_PUBLIC_HEADER_ISSUER_NAME       | ヘッダの [発行元] の名称                            |「, 」区切りで複数指定|
 | NEXT_PUBLIC_HEADER_ISSUER_LINK       | ヘッダの [発行元] のリンク                          |「, 」区切りで複数指定|
-| NEXT_PUBLIC_FOOTER_NAME              | フッタに表示する項目の名称                          |「, 」区切りで複数指定|
+| NEXT_PUBLIC_FOOTER_NAME              | フッタに表示する項目の名称<br>「お問い合わせ」を含む項目のリンクは、バッジ検証サービスが停止しているときのメッセージでも案内する |「, 」区切りで複数指定|
 | NEXT_PUBLIC_FOOTER_LINK              | フッタに表示する項目のリンク                        |「, 」区切りで複数指定|
 | NEXT_PUBLIC_BACK_URL                 | 「戻る」ボタンの遷移先デフォルト値                  | back_urlクエリパラメータが指定されている場合は、そちらを優先します。|
 
